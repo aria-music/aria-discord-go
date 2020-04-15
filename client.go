@@ -20,8 +20,9 @@ const TIMEOUT = 30 * time.Second
 type client struct {
 	sync.RWMutex
 
-	token    string
-	endpoint string
+	token                  string
+	endpoint               string
+	streamEndpointOverride string
 
 	stream  chan<- []byte
 	botRecv <-chan *request
@@ -48,6 +49,7 @@ func newClient(
 	if c.endpoint = config.AriaEndpoint; c.endpoint == "" {
 		c.endpoint = "wss://aria.gaiji.pro/"
 	}
+	c.streamEndpointOverride = config.StreamEndpointOverride
 
 	c.stream = stream
 	c.botRecv = botToCli
@@ -191,7 +193,11 @@ func (c *client) handleHelloPacket(ctx context.Context) error {
 		return err
 	}
 
-	s, err := newStream(hello.Stream, hello.Session, c.stream)
+	end := hello.Stream
+	if c.streamEndpointOverride != "" {
+		end = c.streamEndpointOverride
+	}
+	s, err := newStream(end, hello.Session, c.stream)
 	if err != nil {
 		return err
 	}
