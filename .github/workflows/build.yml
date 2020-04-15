@@ -17,7 +17,7 @@ jobs:
         goos: [darwin, linux, windows]
       fail-fast: false
     env:
-      ASSET_NAME: ${{ env.TARGET }}-${{ matrix.goos }}-amd64
+      ASSET_NAME: aria-discord-go-${{ matrix.goos }}-amd64
     steps:
     - uses: actions/checkout@v1
       with:

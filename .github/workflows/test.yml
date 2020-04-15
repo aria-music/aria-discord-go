@@ -19,7 +19,7 @@ jobs:
       with:
         go-version: 1.14.x
     - name: test
-      run: go test
+      run: go test -v
     - name: discord notify
       if: always()
       uses: sarisia/actions-status-discord@v1
