@@ -78,14 +78,17 @@ func newBot(
 	b.addCmdHandler("repeat", b.cmdRepeat)
 	b.addCmdHandler("updatedb", b.cmdUpdateDB)
 	b.addCmdHandler("nowplaying", b.cmdNowPlaying)
-	b.addCmdHandler("np", b.cmdNowPlaying)
 	b.addCmdHandler("summon", b.cmdSummon)
+	b.addCmdHandler("invite", b.cmdInvite)
+	b.addCmdHandler("token", b.cmdToken)
 
 	// register aria packet handlers
 	b.addPacketHandler(onState)
 	b.addPacketHandler(onStateEvent)
 	b.addPacketHandler(updateOnState)
 	b.addPacketHandler(updateOnStateEvent)
+	b.addPacketHandler(onInvite)
+	b.addPacketHandler(onToken)
 
 	return b, nil
 }
@@ -201,9 +204,10 @@ func (b *bot) onReady(s *discordgo.Session, r *discordgo.Ready) {
 
 // parse message from discord, fire cmdHandlers
 func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// if author is a bot itself, ignore it
 	b.RLock()
 	if m.Author.ID == b.botUser.ID {
+		// if author is bot, delete after 30s
+		go b.deleteMessageAfter(m.Message, 30*time.Second)
 		return
 	}
 	b.RUnlock()
@@ -212,6 +216,7 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if !strings.HasPrefix(m.Content, b.prefix) {
 		return
 	}
+	go b.deleteMessageAfter(m.Message, 0)
 
 	raw := strings.Split(strings.TrimSpace(m.Content), " ")
 	cmd := strings.ToLower(strings.TrimPrefix(raw[0], b.prefix))
@@ -237,5 +242,12 @@ func (b *bot) sendAriaRequest(r *request) {
 	select {
 	case <-time.After(CHAN_TIMEOUT):
 	case b.ariaSend <- r:
+	}
+}
+
+func (b *bot) deleteMessageAfter(m *discordgo.Message, t time.Duration) {
+	time.Sleep(t)
+	if err := b.ChannelMessageDelete(m.ChannelID, m.ID); err != nil {
+		log.Printf("failed to delete message: %v\n", err)
 	}
 }

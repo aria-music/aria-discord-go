@@ -150,6 +150,20 @@ func (b *bot) cmdSummon(m *discordgo.Message, _ []string) {
 	}
 }
 
+func (b *bot) cmdInvite(m *discordgo.Message, _ []string) {
+	b.sendAriaRequest(&request{
+		OP:       "invite",
+		Postback: m.ChannelID,
+	})
+}
+
+func (b *bot) cmdToken(m *discordgo.Message, _ []string) {
+	b.sendAriaRequest(&request{
+		OP:       "token",
+		Postback: m.ChannelID,
+	})
+}
+
 // utility functions
 
 func newEmbed() (e *discordgo.MessageEmbed) {

@@ -1,6 +1,7 @@
 package aria
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/bwmarrin/discordgo"
@@ -78,6 +79,36 @@ func onState(b *bot, pb string, d *stateData) {
 
 	if _, err := b.ChannelMessageSendEmbed(pb, e); err != nil {
 		log.Printf("failed to send nowplaying embed: %v\n", err)
+	}
+}
+
+func onInvite(b *bot, pb string, d *inviteData) {
+	if pb == "" {
+		return
+	}
+
+	e := newEmbed()
+	e.Color = 0x57ffae
+	e.Title = "Welcome!"
+	e.Description = fmt.Sprintf("Register here:\nhttps://aria.gaiji.pro/auth/github/register?invite=%s", d.Invite)
+
+	if _, err := b.ChannelMessageSendEmbed(pb, e); err != nil {
+		log.Printf("failed to send invite embed: %v\n", err)
+	}
+}
+
+func onToken(b *bot, pb string, d *tokenData) {
+	if pb == "" {
+		return
+	}
+
+	e := newEmbed()
+	e.Color = 0x57ffae
+	e.Title = "New token"
+	e.Description = fmt.Sprintf("Your token is:\n`%s`", d.Token)
+
+	if _, err := b.ChannelMessageSendEmbed(pb, e); err != nil {
+		log.Printf("failed to send token embed: %v\n", err)
 	}
 }
 
