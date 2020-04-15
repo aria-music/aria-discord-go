@@ -1,0 +1,45 @@
+name: build
+on:
+  push:
+    branches:
+    - '**'
+    tags-ignore: 
+    - '**'
+env:
+  TARGET: aria-discord-go
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [darwin, linux, windows]
+      fail-fast: false
+    env:
+      ASSET_NAME: aria-discord-go-${{ matrix.goos }}-amd64
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-go@v1
+      with:
+        go-version: 1.13.x
+    - run: mkdir bin
+    - name: build
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: amd64
+      run: go build -o bin/ ./cmd/aria-discord-go/
+    - name: upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: ${{ env.ASSET_NAME }}
+        path: bin
+    - name: discord notify
+      if: always()
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        status: ${{ job.status }}
+        job: ${{ env.TARGET }} - ${{ matrix.goos }}
