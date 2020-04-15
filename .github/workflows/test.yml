@@ -1,0 +1,29 @@
+name: test
+on:
+  push:
+    branches:
+    - '**'
+    tags-ignore: 
+    - '**'
+env:
+  TARGET: aria-discord-go
+
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-go@v1
+      with:
+        go-version: 1.14.x
+    - name: test
+      run: go test
+    - name: discord notify
+      if: always()
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        status: ${{ job.status }}
+        job: ${{ env.TARGET }} - test
