@@ -150,6 +150,21 @@ func (b *bot) cmdSummon(m *discordgo.Message, _ []string) {
 	}
 }
 
+func (b *bot) cmdDisconnect(m *discordgo.Message, _ []string) {
+	b.Session.RLock()
+	v, ok := b.VoiceConnections[m.GuildID]
+	b.Session.RUnlock()
+
+	if !ok {
+		sendErrorResponse(b, m.ChannelID, "Not in voice channel.")
+		return
+	}
+
+	if err := v.Disconnect(); err != nil {
+		log.Printf("failed to disconnect voice: %v\n", err)
+	}
+}
+
 func (b *bot) cmdInvite(m *discordgo.Message, _ []string) {
 	b.sendAriaRequest(&request{
 		OP:       "invite",
