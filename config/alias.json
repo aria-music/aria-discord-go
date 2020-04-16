@@ -1,0 +1,9 @@
+{
+    "alias": {
+        "fuck": ["gaiji"],
+        "skip": ["s"],
+        "pause": ["stop", "."],
+        "resume": ["r"],
+        "nowplaying": ["np"]
+    }
+}

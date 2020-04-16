@@ -29,6 +29,7 @@ type bot struct {
 
 	botUser *discordgo.User
 	store   store
+	alias   *alias
 	stream  <-chan []byte
 }
 
@@ -58,6 +59,12 @@ func newBot(
 	b.stream = stream
 	b.ariaRecv = cliToBot
 	b.ariaSend = botToCli
+
+	if alias, err := newAlias(); err != nil {
+		log.Printf("failed to initialize alias. skip")
+	} else {
+		b.alias = alias
+	}
 
 	// initialize Discord session
 	s, err := discordgo.New("Bot " + b.token)
@@ -222,11 +229,16 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	cmd := strings.ToLower(strings.TrimPrefix(raw[0], b.prefix))
 	args := raw[1:] // spec: min <= len <= cap <= max
 
-	// TODO: alias
 	hs, ok := b.cmdHandlers[cmd]
+	// try alias
+	if !ok {
+		if al := b.alias.resolve(cmd); al != "" {
+			hs, ok = b.cmdHandlers[al]
+		}
+	}
 	if !ok {
 		log.Printf("no cmdHandler for %s", cmd)
-		sendErrorResponse(b, m.ChannelID, "No command found: "+cmd)
+		sendErrorResponse(b, m.ChannelID, fmt.Sprintf("Command not found: `%s`", cmd))
 		return
 	}
 
