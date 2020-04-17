@@ -20,16 +20,16 @@ jobs:
     - uses: actions/setup-go@v1
       with:
         go-version: 1.14.x
-    - run: mkdir release
+    - run: mkdir aria-discord-go
     - name: build
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: amd64
-      run: go build -o release/ ./cmd/aria-discord-go/
-    - name: copy static assets to release directory
-      run: cp -r static/* release/
+      run: go build -o aria-discord-go/ ./cmd/aria-discord-go/
+    - name: run release script
+      run: release/release.sh
     - name: zip it
-      run: zip -r ${{ env.ASSET_NAME }}.zip release
+      run: zip -r ${{ env.ASSET_NAME }}.zip aria-discord-go
     - name: release
       uses: actions/upload-release-asset@v1.0.1
       env:
