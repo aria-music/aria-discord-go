@@ -232,7 +232,7 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	hs, ok := b.cmdHandlers[cmd]
 	// try alias
-	if !ok {
+	if !ok && b.alias != nil {
 		if al := b.alias.resolve(cmd); al != "" {
 			hs, ok = b.cmdHandlers[al]
 		}
