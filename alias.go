@@ -14,7 +14,7 @@ type alias struct {
 }
 
 func newAlias() (*alias, error) {
-	file := "config/alias.json"
+	file := "alias.json"
 
 	f, err := os.Open(file)
 	if err != nil {

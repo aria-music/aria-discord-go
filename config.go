@@ -17,7 +17,7 @@ type config struct {
 
 func newConfig() (*config, error) {
 	// TODO: make configurable
-	file := "config/config.json"
+	file := "config.json"
 
 	f, err := os.Open(file)
 	if err != nil {
