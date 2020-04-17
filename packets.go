@@ -91,7 +91,13 @@ func onInvite(b *bot, pb string, d *inviteData) {
 	e := newEmbed()
 	e.Color = 0x57ffae
 	e.Title = "Welcome!"
-	e.Description = fmt.Sprintf("Register here:\nhttps://aria.gaiji.pro/auth/github/register?invite=%s", d.Invite)
+	e.Description = fmt.Sprintf("Click [here](https://aria.gaiji.pro/auth/github/register?invite=%s) to register", d.Invite)
+	e.Fields = []*discordgo.MessageEmbedField{
+		{
+			Name:  "Invite code",
+			Value: fmt.Sprintf("`%s`", d.Invite),
+		},
+	}
 
 	m, err := b.ChannelMessageSendEmbed(pb, e)
 	if err != nil {

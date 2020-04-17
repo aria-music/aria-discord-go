@@ -1,8 +1,10 @@
 package aria
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -15,7 +17,7 @@ import (
 type cmdHandler func(*discordgo.Message, []string)
 
 var msgAuthor = &discordgo.MessageEmbedFooter{
-	Text: "Aria Discord",
+	Text: "Aria Discord Go",
 	// IconURL: "",
 }
 var fuckEmotes = []string{
@@ -30,6 +32,9 @@ var fuckMessage = []string{
 	":regional_indicator_o:",
 	":regional_indicator_u:",
 }
+var tweetTemplate = `%s
+%s
+#NowPlaying`
 
 func (b *bot) cmdFuck(m *discordgo.Message, _ []string) {
 	e := newEmbed()
@@ -122,6 +127,26 @@ func (b *bot) cmdNowPlaying(m *discordgo.Message, args []string) {
 		OP:       "state",
 		Postback: m.ChannelID,
 	})
+}
+
+func (b *bot) cmdTweet(m *discordgo.Message, _ []string) {
+	state := b.store.getState()
+	euri := state.Entry.URI
+	if !strings.HasPrefix(euri, "http") {
+		euri = "https://play.google.com/music/listen"
+	}
+	text := fmt.Sprintf(tweetTemplate, state.Entry.Title, euri)
+	url := "https://twitter.com/intent/tweet?text=" + url.PathEscape(text)
+
+	e := newEmbed()
+	e.Color = 0x1da1f2
+	e.Title = "Tweet"
+	e.URL = url
+	e.Description = fmt.Sprintf("Click [here](%s) to tweet!", url)
+
+	if _, err := b.ChannelMessageSendEmbed(m.ChannelID, e); err != nil {
+		log.Printf("failed to send tweet embed: %v\n", err)
+	}
 }
 
 func (b *bot) cmdSummon(m *discordgo.Message, _ []string) {
