@@ -1,0 +1,7 @@
+{
+    "discord_token": "",
+    "aria_token": "",
+    "aria_endpoint": "",
+    "stream_endpoint_override": "",
+    "command_prefix": "!"
+}
