@@ -17,19 +17,19 @@ jobs:
       ASSET_NAME: aria-discord-go-${{ matrix.goos }}-amd64
     steps:
     - uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
     - uses: actions/setup-go@v1
       with:
         go-version: 1.14.x
-    - run: mkdir bin
+    - run: mkdir release
     - name: build
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: amd64
-      run: go build -o bin/ ./cmd/aria-discord-go/
+      run: go build -o release/ ./cmd/aria-discord-go/
+    - name: copy static assets to release directory
+      run: cp -r static/* release/
     - name: zip it
-      run: zip -r ${{ env.ASSET_NAME }}.zip bin
+      run: zip -r -D ${{ env.ASSET_NAME }}.zip release
     - name: release
       uses: actions/upload-release-asset@v1.0.1
       env:
