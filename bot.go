@@ -92,6 +92,7 @@ func newBot(
 	b.addCmdHandler("token", b.cmdToken)
 	b.addCmdHandler("disconnect", b.cmdDisconnect)
 	b.addCmdHandler("tweet", b.cmdTweet)
+	b.addCmdHandler("version", b.cmdVersion)
 
 	// register aria packet handlers
 	b.addPacketHandler(onState)

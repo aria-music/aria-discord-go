@@ -16,6 +16,8 @@ import (
 // we cannot timeout command execution
 type cmdHandler func(*discordgo.Message, []string)
 
+var botVersion string = "debug"
+
 var msgAuthor = &discordgo.MessageEmbedFooter{
 	Text: "Aria Discord Go",
 	// IconURL: "",
@@ -202,6 +204,28 @@ func (b *bot) cmdToken(m *discordgo.Message, _ []string) {
 		OP:       "token",
 		Postback: m.ChannelID,
 	})
+}
+
+func (b *bot) cmdVersion(m *discordgo.Message, _ []string) {
+	e := newEmbed()
+	e.Color = 0xff7092
+	e.Title = "Aria Discord Go"
+	e.Fields = []*discordgo.MessageEmbedField{
+		{
+			Name:   "Version",
+			Value:  fmt.Sprintf("`%s`", botVersion),
+			Inline: false,
+		},
+		{
+			Name:   "GitHub",
+			Value:  "https://github.com/aria-music/aria-discord-go",
+			Inline: false,
+		},
+	}
+
+	if _, err := b.ChannelMessageSendEmbed(m.ChannelID, e); err != nil {
+		log.Printf("failed to send version embed: %v\n", err)
+	}
 }
 
 // utility functions
