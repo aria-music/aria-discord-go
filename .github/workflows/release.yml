@@ -29,7 +29,7 @@ jobs:
     - name: copy static assets to release directory
       run: cp -r static/* release/
     - name: zip it
-      run: zip -r -D ${{ env.ASSET_NAME }}.zip release
+      run: zip -r ${{ env.ASSET_NAME }}.zip release
     - name: release
       uses: actions/upload-release-asset@v1.0.1
       env:
