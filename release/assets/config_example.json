@@ -3,5 +3,8 @@
     "aria_token": "",
     "aria_endpoint": "",
     "stream_endpoint_override": "",
-    "command_prefix": "!"
+    "command_prefix": "!",
+    "keep_message_channel": [
+        ""
+    ]
 }

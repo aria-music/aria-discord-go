@@ -20,6 +20,7 @@ type bot struct {
 
 	token    string
 	prefix   string
+	keepMsg  keepMsgMap
 	ariaRecv <-chan *packet
 	ariaSend chan<- *request
 
@@ -55,6 +56,7 @@ func newBot(
 	if b.prefix = config.CommandPrefix; b.prefix == "" {
 		b.prefix = "."
 	}
+	b.keepMsg = config.keepMsg
 
 	b.stream = stream
 	b.ariaRecv = cliToBot
@@ -215,7 +217,7 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	b.RLock()
 	if m.Author.ID == b.botUser.ID {
 		// if author is bot, delete after 30s
-		go b.deleteMessageAfter(m.Message, 30*time.Second)
+		go b.deleteMessageAfter(m.Message, 30*time.Second, false)
 		return
 	}
 	b.RUnlock()
@@ -224,7 +226,7 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if !strings.HasPrefix(m.Content, b.prefix) {
 		return
 	}
-	go b.deleteMessageAfter(m.Message, 0)
+	go b.deleteMessageAfter(m.Message, 0, false)
 
 	raw := strings.Split(strings.TrimSpace(m.Content), " ")
 	cmd := strings.ToLower(strings.TrimPrefix(raw[0], b.prefix))
@@ -258,7 +260,12 @@ func (b *bot) sendAriaRequest(r *request) {
 	}
 }
 
-func (b *bot) deleteMessageAfter(m *discordgo.Message, t time.Duration) {
+func (b *bot) deleteMessageAfter(m *discordgo.Message, t time.Duration, force bool) {
+	// if msg is in keepMessageChannel, skip.
+	if !force && b.keepMsg.isKeepMsgChannel(m.ChannelID) {
+		return
+	}
+
 	time.Sleep(t)
 	if err := b.ChannelMessageDelete(m.ChannelID, m.ID); err != nil {
 		log.Printf("failed to delete message: %v\n", err)

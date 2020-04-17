@@ -3,6 +3,7 @@ package aria
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -92,9 +93,12 @@ func onInvite(b *bot, pb string, d *inviteData) {
 	e.Title = "Welcome!"
 	e.Description = fmt.Sprintf("Register here:\nhttps://aria.gaiji.pro/auth/github/register?invite=%s", d.Invite)
 
-	if _, err := b.ChannelMessageSendEmbed(pb, e); err != nil {
+	m, err := b.ChannelMessageSendEmbed(pb, e)
+	if err != nil {
 		log.Printf("failed to send invite embed: %v\n", err)
+		return
 	}
+	b.deleteMessageAfter(m, 30*time.Second, true)
 }
 
 func onToken(b *bot, pb string, d *tokenData) {
@@ -107,9 +111,12 @@ func onToken(b *bot, pb string, d *tokenData) {
 	e.Title = "New token"
 	e.Description = fmt.Sprintf("Your token is:\n`%s`", d.Token)
 
-	if _, err := b.ChannelMessageSendEmbed(pb, e); err != nil {
+	m, err := b.ChannelMessageSendEmbed(pb, e)
+	if err != nil {
 		log.Printf("failed to send token embed: %v\n", err)
+		return
 	}
+	b.deleteMessageAfter(m, 30*time.Second, true)
 }
 
 func onStateEvent(b *bot, pb string, ed *stateEventData) {
