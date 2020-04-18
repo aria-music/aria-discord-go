@@ -2,11 +2,11 @@ package aria
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 	"sync"
+	"time"
 )
 
 // Run is a entrypoint called from main
@@ -79,13 +79,13 @@ func (l *launcher) launch(parent context.Context) {
 }
 
 func (l *launcher) launchBot(ctx context.Context, errChan chan<- error) {
-	// TODO: fail count
-	fail := 0
+	var start time.Time = time.Now()
 	for {
-		if fail >= 5 {
-			errChan <- errors.New("bot fucked")
-			return
+		if time.Now().Sub(start) < 5*time.Minute {
+			log.Printf("bot cooldown: 1min...")
+			time.Sleep(time.Minute)
 		}
+
 		b, err := newBot(l.config, l.cliToBot, l.botToCli, l.stream)
 		if err != nil {
 			errChan <- fmt.Errorf("failed to initialize bot: %w", err)
@@ -98,21 +98,21 @@ func (l *launcher) launchBot(ctx context.Context, errChan chan<- error) {
 			return
 		default:
 			log.Printf("starting: bot")
+			start = time.Now()
 			b.run(ctx)
 			log.Printf("crashed: bot")
 		}
-		fail++
 	}
 }
 
 func (l *launcher) launchClient(ctx context.Context, errChan chan<- error) {
-	// TODO: fail count
-	fail := 0
+	var start time.Time = time.Now()
 	for {
-		if fail >= 5 {
-			errChan <- errors.New("client fucked")
-			return
+		if time.Now().Sub(start) < 5*time.Minute {
+			log.Printf("client cooldown: 1min...")
+			time.Sleep(time.Minute)
 		}
+
 		c, err := newClient(l.config, l.cliToBot, l.botToCli, l.stream)
 		if err != nil {
 			errChan <- fmt.Errorf("failed to initialize client: %w", err)
@@ -125,10 +125,9 @@ func (l *launcher) launchClient(ctx context.Context, errChan chan<- error) {
 			return
 		default:
 			log.Printf("starting: client")
+			start = time.Now()
 			c.run(ctx)
 			log.Printf("crashed: client")
 		}
-
-		fail++
 	}
 }
