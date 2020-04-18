@@ -79,11 +79,16 @@ func (l *launcher) launch(parent context.Context) {
 }
 
 func (l *launcher) launchBot(ctx context.Context, errChan chan<- error) {
-	var start time.Time = time.Now()
+	var start time.Time
 	for {
 		if time.Now().Sub(start) < 5*time.Minute {
 			log.Printf("bot cooldown: 1min...")
-			time.Sleep(time.Minute)
+			select {
+			case <-ctx.Done():
+				log.Printf("launch cancelled: bot")
+				return
+			case <-time.After(time.Minute):
+			}
 		}
 
 		b, err := newBot(l.config, l.cliToBot, l.botToCli, l.stream)
@@ -106,11 +111,16 @@ func (l *launcher) launchBot(ctx context.Context, errChan chan<- error) {
 }
 
 func (l *launcher) launchClient(ctx context.Context, errChan chan<- error) {
-	var start time.Time = time.Now()
+	var start time.Time
 	for {
 		if time.Now().Sub(start) < 5*time.Minute {
 			log.Printf("client cooldown: 1min...")
-			time.Sleep(time.Minute)
+			select {
+			case <-ctx.Done():
+				log.Printf("launch cancelled: client")
+				return
+			case <-time.After(time.Minute):
+			}
 		}
 
 		c, err := newClient(l.config, l.cliToBot, l.botToCli, l.stream)
