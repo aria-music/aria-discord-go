@@ -34,6 +34,9 @@ var fuckMessage = []string{
 	":regional_indicator_o:",
 	":regional_indicator_u:",
 }
+var digitEmojis = []string{
+	"0️⃣", ":one:", "2️⃣", "3️⃣", "4️⃣", "5️⃣",
+}
 var tweetTemplate = `%s
 %s
 #NowPlaying`
@@ -129,6 +132,55 @@ func (b *bot) cmdNowPlaying(m *discordgo.Message, args []string) {
 		OP:       "state",
 		Postback: m.ChannelID,
 	})
+}
+
+func (b *bot) cmdQueue(m *discordgo.Message, _ []string) {
+	q := b.store.getQueue()
+	s := b.store.getState()
+	if q == nil {
+		sendErrorResponse(b, m.ChannelID, "Something went wrong. Try again later.")
+		b.sendAriaRequest(&request{
+			OP: "list_queue",
+		})
+		return
+	}
+	if s == nil || s.Entry == nil {
+		sendErrorResponse(b, m.ChannelID, "Something went wrong. Try again later.")
+		b.sendAriaRequest(&request{
+			OP: "state",
+		})
+		return
+	}
+
+	e := newEmbed()
+	e.Color = 0xff955c
+	e.Title = s.getPrefixEmoji() + s.Entry.Title
+
+	flen := len(q.Queue)
+	if flen > 5 {
+		flen = 5
+	}
+
+	e.Fields = []*discordgo.MessageEmbedField{}
+	for i := 0; i < flen; i++ {
+		e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
+			Name:   "Track " + strconv.Itoa(i+1),
+			Value:  digitEmojis[i+1] + " " + q.Queue[i].Title,
+			Inline: false,
+		})
+	}
+
+	if len(q.Queue) > 5 {
+		e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
+			Name:  "And...",
+			Value: "🈵 **" + strconv.Itoa(len(q.Queue)-5) + "** more songs",
+		})
+	}
+
+	if _, err := b.ChannelMessageSendEmbed(m.ChannelID, e); err != nil {
+		log.Printf("failed to send error embed: %v\n", err)
+		return
+	}
 }
 
 func (b *bot) cmdTweet(m *discordgo.Message, _ []string) {

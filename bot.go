@@ -87,6 +87,7 @@ func newBot(
 	b.addCmdHandler("repeat", b.cmdRepeat)
 	b.addCmdHandler("updatedb", b.cmdUpdateDB)
 	b.addCmdHandler("nowplaying", b.cmdNowPlaying)
+	b.addCmdHandler("queue", b.cmdQueue)
 	b.addCmdHandler("summon", b.cmdSummon)
 	b.addCmdHandler("invite", b.cmdInvite)
 	b.addCmdHandler("token", b.cmdToken)
@@ -99,6 +100,8 @@ func newBot(
 	b.addPacketHandler(onStateEvent)
 	b.addPacketHandler(updateOnState)
 	b.addPacketHandler(updateOnStateEvent)
+	b.addPacketHandler(updateOnQueue)
+	b.addPacketHandler(updateOnQueueEvent)
 	b.addPacketHandler(onInvite)
 	b.addPacketHandler(onToken)
 

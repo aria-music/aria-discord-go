@@ -16,6 +16,14 @@ func updateOnStateEvent(b *bot, _ string, d *stateEventData) {
 	b.store.setState((*stateData)(d))
 }
 
+func updateOnQueue(b *bot, _ string, q *queueData) {
+	b.store.setQueue(q)
+}
+
+func updateOnQueueEvent(b *bot, _ string, q *queueEventData) {
+	b.store.setQueue((*queueData)(q))
+}
+
 func onState(b *bot, pb string, d *stateData) {
 	if pb == "" {
 		return
@@ -26,7 +34,6 @@ func onState(b *bot, pb string, d *stateData) {
 
 	e := newEmbed()
 	e.Color = 0x5ce1ff
-	e.Title = d.Entry.Title
 
 	if d.Entry.Thumbnail != "" {
 		e.Thumbnail = &discordgo.MessageEmbedThumbnail{
