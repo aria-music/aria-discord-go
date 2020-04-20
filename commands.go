@@ -244,6 +244,17 @@ func (b *bot) cmdDisconnect(m *discordgo.Message, _ []string) {
 	}
 }
 
+func (b *bot) cmdLogin(m *discordgo.Message, _ []string) {
+	e := newEmbed()
+	e.Color = 0x57ffae
+	e.Title = "Welcome back!"
+	e.URL = "https://aria.gaiji.pro/auth/github/login"
+	e.Description = "Click [here](https://aria.gaiji.pro/auth/github/login) to login"
+	if _, err := b.ChannelMessageSendEmbed(m.ChannelID, e); err != nil {
+		log.Printf("Failed to send login embed: %v\n", err)
+	}
+}
+
 func (b *bot) cmdInvite(m *discordgo.Message, _ []string) {
 	b.sendAriaRequest(&request{
 		OP:       "invite",
