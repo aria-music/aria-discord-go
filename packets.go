@@ -34,6 +34,7 @@ func onState(b *bot, pb string, d *stateData) {
 
 	e := newEmbed()
 	e.Color = 0x5ce1ff
+	e.Title = d.Entry.Title
 
 	if d.Entry.Thumbnail != "" {
 		e.Thumbnail = &discordgo.MessageEmbedThumbnail{
