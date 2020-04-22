@@ -76,6 +76,7 @@ func newBot(
 	b.Session = s
 	b.AddHandler(b.onMessage)
 	b.AddHandler(b.onReady)
+	b.AddHandler(b.onDisconnect)
 
 	// register discord command handlers
 	b.addCmdHandler("fuck", b.cmdFuck)
