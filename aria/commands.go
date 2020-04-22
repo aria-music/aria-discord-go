@@ -156,6 +156,59 @@ func (b *bot) cmdRepeat(m *discordgo.Message, args []string) {
 	})
 }
 
+func (b *bot) cmdLike(m *discordgo.Message, args []string) {
+	var uri string
+	// URI cannot be separated by space character
+	if len(args) < 1 {
+		state := b.store.getState()
+		if state.Entry == nil {
+			sendErrorResponse(b, m.ChannelID, "Nothing to like!")
+			return
+		}
+		uri = state.Entry.URI
+	} else {
+		uri = args[0]
+	}
+
+	b.doSave(uri, "Likes")
+}
+
+func (b *bot) cmdSave(m *discordgo.Message, args []string) {
+	if len(args) < 1 {
+		sendErrorResponse(b, m.ChannelID, "Playlist is missing!")
+		return
+	}
+	// len 1 -> playlist
+	// len 2 -> uri, playlist
+	// playlist must not contain space...
+	var playlist string
+	var uri string
+	if len(args) == 1 {
+		state := b.store.getState()
+		if state.Entry == nil {
+			sendErrorResponse(b, m.ChannelID, "Nothing to save!")
+			return
+		}
+		uri = state.Entry.URI
+		playlist = args[0]
+	} else {
+		uri = args[0]
+		playlist = args[1]
+	}
+
+	b.doSave(uri, playlist)
+}
+
+func (b *bot) doSave(uri string, playlist string) {
+	b.sendAriaRequest(&request{
+		OP: "add_to_playlist",
+		Data: &addToPlaylistRequest{
+			Name: playlist,
+			URI:  uri,
+		},
+	})
+}
+
 func (b *bot) cmdNowPlaying(m *discordgo.Message, args []string) {
 	b.sendAriaRequest(&request{
 		OP:       "state",

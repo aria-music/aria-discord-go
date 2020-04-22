@@ -8,6 +8,7 @@
         "queue": ["q"],
         "login": ["web"],
         "play": ["p"],
-        "playnext": ["pn"]
+        "playnext": ["pn"],
+        "like": ["fav"]
     }
 }
