@@ -4,6 +4,8 @@
         "skip": ["s"],
         "pause": ["stop", "."],
         "resume": ["r"],
-        "nowplaying": ["np"]
+        "nowplaying": ["np"],
+        "queue": ["q"],
+        "login": ["web"]
     }
 }
