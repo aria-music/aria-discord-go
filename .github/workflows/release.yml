@@ -25,7 +25,7 @@ jobs:
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: amd64
-      run: go build -ldflags "-X github.com/aria-music/aria.botVersion=${{ github.sha }}" -o aria-discord-go/
+      run: go build -ldflags "-X github.com/aria-music/aria-discord-go.botVersion=${{ github.sha }}" -o aria-discord-go/
     - name: run release script
       run: release/release.sh
     - name: zip it
