@@ -97,6 +97,7 @@ func newBot(
 	b.addCmdHandler("version", b.cmdVersion)
 	b.addCmdHandler("login", b.cmdLogin)
 	b.addCmdHandler("play", b.cmdPlay)
+	b.addCmdHandler("playnext", b.cmdPlayNext)
 
 	// register aria packet handlers
 	b.addPacketHandler(onState)

@@ -6,6 +6,8 @@
         "resume": ["r"],
         "nowplaying": ["np"],
         "queue": ["q"],
-        "login": ["web"]
+        "login": ["web"],
+        "play": ["p"],
+        "playnext": ["pn"]
     }
 }

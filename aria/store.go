@@ -1,6 +1,7 @@
 package aria
 
 import (
+	"strings"
 	"sync"
 	"sync/atomic"
 	"unsafe"
@@ -61,7 +62,7 @@ func (s *store) makeMappedPlaylists(d *playlistsData) {
 func (d *playlistsData) getMapped() map[string]struct{} {
 	m := make(map[string]struct{})
 	for _, p := range d.Playlists {
-		m[p.Name] = struct{}{}
+		m[strings.ToLower(p.Name)] = struct{}{}
 	}
 
 	return m

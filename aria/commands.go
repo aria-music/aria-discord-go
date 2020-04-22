@@ -103,10 +103,33 @@ func (b *bot) cmdUpdateDB(m *discordgo.Message, args []string) {
 	})
 }
 
-func (b *bot) cmdPlay(m *discordgo.Message, args []string) {
+func (b *bot) cmdPlay(_ *discordgo.Message, args []string) {
+	b.doPlay(args, false)
+}
+
+func (b *bot) cmdPlayNext(_ *discordgo.Message, args []string) {
+	b.doPlay(args, true)
+}
+
+func (b *bot) doPlay(args []string, head bool) {
 	// args is splitted by " " (single space) so get back them by joining
 	arg := strings.Join(args, " ")
 
+	r := &queueRequest{
+		Head: head,
+	}
+	if low := strings.ToLower(arg); b.store.isPlaylist(low) {
+		r.Playlist = low
+	} else {
+		r.URI = []string{
+			arg,
+		}
+	}
+
+	b.sendAriaRequest(&request{
+		OP:   "queue",
+		Data: r,
+	})
 }
 
 func (b *bot) cmdRepeat(m *discordgo.Message, args []string) {

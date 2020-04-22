@@ -47,7 +47,9 @@ type skipToRequest struct {
 }
 
 type queueRequest struct {
-	URI []string `json:"uri"`
+	URI      []string `json:"uri"`
+	Head     bool     `json:"head,omitempty"`
+	Playlist string   `json:"playlist,omitempty"`
 }
 
 type repeatRequest struct {
