@@ -34,7 +34,7 @@ jobs:
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: amd64
-      run: go build -ldflags "-X github.com/aria-music/aria.botVersion=${{ github.sha }}" -o bin/ ./cmd/aria-discord-go/
+      run: go build -ldflags "-X github.com/aria-music/aria.botVersion=${{ github.sha }}" -o bin/
     - name: upload artifact
       uses: actions/upload-artifact@v1
       with:

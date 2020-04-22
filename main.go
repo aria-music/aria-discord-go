@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/aria-music/aria"
+	"github.com/aria-music/aria-discord-go/aria"
 )
 
 func main() {
