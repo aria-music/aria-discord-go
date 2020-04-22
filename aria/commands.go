@@ -43,7 +43,7 @@ var tweetTemplate = `%s
 
 func (b *bot) cmdFuck(m *discordgo.Message, _ []string) {
 	e := newEmbed()
-	e.Color = rand.Intn(0x1000000)
+	e.Color = rand.Intn(0x1000000) // 0x000000 - 0xffffff
 	e.Description = strings.Join(fuckMessage, " ")
 	// TODO: mention
 
@@ -101,6 +101,12 @@ func (b *bot) cmdUpdateDB(m *discordgo.Message, args []string) {
 			User: args[0],
 		},
 	})
+}
+
+func (b *bot) cmdPlay(m *discordgo.Message, args []string) {
+	// args is splitted by " " (single space) so get back them by joining
+	arg := strings.Join(args, " ")
+
 }
 
 func (b *bot) cmdRepeat(m *discordgo.Message, args []string) {

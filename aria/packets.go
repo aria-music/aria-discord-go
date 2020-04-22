@@ -24,6 +24,14 @@ func updateOnQueueEvent(b *bot, _ string, q *queueEventData) {
 	b.store.setQueue((*queueData)(q))
 }
 
+func updateOnPlaylists(b *bot, _ string, p *playlistsData) {
+	b.store.setPlaylists(p)
+}
+
+func updateOnPlaylistsEvent(b *bot, _ string, p *playlistsEventData) {
+	b.store.setPlaylists((*playlistsData)(p))
+}
+
 func onState(b *bot, pb string, d *stateData) {
 	if pb == "" {
 		return

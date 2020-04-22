@@ -96,6 +96,7 @@ func newBot(
 	b.addCmdHandler("tweet", b.cmdTweet)
 	b.addCmdHandler("version", b.cmdVersion)
 	b.addCmdHandler("login", b.cmdLogin)
+	b.addCmdHandler("play", b.cmdPlay)
 
 	// register aria packet handlers
 	b.addPacketHandler(onState)
@@ -104,6 +105,8 @@ func newBot(
 	b.addPacketHandler(updateOnStateEvent)
 	b.addPacketHandler(updateOnQueue)
 	b.addPacketHandler(updateOnQueueEvent)
+	b.addPacketHandler(updateOnPlaylists)
+	b.addPacketHandler(updateOnPlaylistsEvent)
 	b.addPacketHandler(onInvite)
 	b.addPacketHandler(onToken)
 
@@ -235,6 +238,7 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	go b.deleteMessageAfter(m.Message, 0, false)
 
+	// TODO: handle multiple space correctly
 	raw := strings.Split(strings.TrimSpace(m.Content), " ")
 	cmd := strings.ToLower(strings.TrimPrefix(raw[0], b.prefix))
 	args := raw[1:] // spec: min <= len <= cap <= max

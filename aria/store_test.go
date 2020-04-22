@@ -1,7 +1,6 @@
 package aria
 
 import (
-	"reflect"
 	"testing"
 )
 
@@ -9,7 +8,6 @@ func TestStoreStateInitialValue(t *testing.T) {
 	s := store{}
 	var want *stateData
 	got := s.getState()
-	t.Logf("type want: %v, type got: %v\n", reflect.TypeOf(want), reflect.TypeOf(got))
 	if got != want {
 		t.Errorf("want: %v, got: %v\n", want, got)
 	}

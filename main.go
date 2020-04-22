@@ -13,8 +13,7 @@ func main() {
 	defer cancel()
 
 	sig := make(chan os.Signal)
-	signal.Notify(sig, os.
-		Interrupt, os.Kill)
+	signal.Notify(sig, os.Interrupt, os.Kill)
 
 	go func() {
 		<-sig
