@@ -148,6 +148,7 @@ func (b *bot) run(parent context.Context) {
 		log.Printf("failed to open Discord connection")
 		return
 	}
+	defer b.Close()
 
 	// audio stream routine
 	wg.Add(1)
@@ -213,6 +214,7 @@ func (b *bot) handlePacket(p *packet) {
 // discord event handlers
 
 func (b *bot) onDisconnect(_ *discordgo.Session, _ *discordgo.Disconnect) {
+	// sometimes it fails to reconnect discord, so we do reconnect by own way
 	log.Printf("disconnected from Discord")
 	b.cancel()
 }
