@@ -113,13 +113,19 @@ func (l *launcher) launchBot(ctx context.Context, errChan chan<- error) {
 func (l *launcher) launchClient(ctx context.Context, errChan chan<- error) {
 	var start time.Time
 	for {
-		if time.Now().Sub(start) < 5*time.Minute {
-			log.Printf("client cooldown: 1min...")
+		// do restart cooldown
+		if start != (time.Time{}) { // avoid cooldown for first launch
+			cooldown := 10 * time.Second
+			if time.Now().Sub(start) < 5*time.Minute {
+				cooldown = time.Minute
+			}
+
+			log.Printf("client cooldown: %v...", cooldown)
 			select {
 			case <-ctx.Done():
 				log.Printf("launch cancelled: client")
 				return
-			case <-time.After(time.Minute):
+			case <-time.After(cooldown):
 			}
 		}
 
