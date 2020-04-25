@@ -73,6 +73,8 @@ func newBot(
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize discord bot: %w", err)
 	}
+	// disable auto reconnect to control retry interval by own
+	s.ShouldReconnectOnError = false
 	b.Session = s
 	b.AddHandler(b.onMessage)
 	b.AddHandler(b.onReady)

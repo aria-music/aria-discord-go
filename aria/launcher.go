@@ -80,6 +80,12 @@ func (l *launcher) launch(parent context.Context) {
 
 func (l *launcher) launchBot(ctx context.Context, errChan chan<- error) {
 	var start time.Time
+	b, err := newBot(l.config, l.cliToBot, l.botToCli, l.stream)
+	if err != nil {
+		errChan <- fmt.Errorf("failed to initialize bot: %w", err)
+		return
+	}
+
 	for {
 		if time.Now().Sub(start) < 5*time.Minute {
 			log.Printf("bot cooldown: 1min...")
@@ -89,12 +95,6 @@ func (l *launcher) launchBot(ctx context.Context, errChan chan<- error) {
 				return
 			case <-time.After(time.Minute):
 			}
-		}
-
-		b, err := newBot(l.config, l.cliToBot, l.botToCli, l.stream)
-		if err != nil {
-			errChan <- fmt.Errorf("failed to initialize bot: %w", err)
-			return
 		}
 
 		select {
