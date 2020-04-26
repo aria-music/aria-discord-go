@@ -373,6 +373,10 @@ func (b *bot) cmdVersion(m *discordgo.Message, _ []string) {
 	}
 }
 
+func (b *bot) cmdRestart(_ *discordgo.Message, _ []string) {
+	b.cancel()
+}
+
 // utility functions
 
 func newEmbed() (e *discordgo.MessageEmbed) {

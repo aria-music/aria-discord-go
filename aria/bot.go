@@ -102,6 +102,7 @@ func newBot(
 	b.addCmdHandler("playnext", b.cmdPlayNext)
 	b.addCmdHandler("like", b.cmdLike)
 	b.addCmdHandler("save", b.cmdSave)
+	b.addCmdHandler("restart", b.cmdRestart)
 
 	// register aria packet handlers
 	b.addPacketHandler(onState)
@@ -144,7 +145,6 @@ func (b *bot) run(parent context.Context) {
 	b.cancel = cancel
 
 	wg := sync.WaitGroup{}
-	defer wg.Wait()
 
 	if err := b.Open(); err != nil {
 		log.Printf("failed to open Discord connection")
@@ -234,7 +234,7 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	b.RLock()
 	if m.Author.ID == b.botUser.ID {
 		// if author is bot, delete after 30s
-		go b.deleteMessageAfter(m.Message, 30*time.Second, false)
+		b.deleteMessageAfter(m.Message, 30*time.Second, false)
 		return
 	}
 	b.RUnlock()
