@@ -168,6 +168,11 @@ func (b *bot) run(parent context.Context) {
 		cancel() // TODO: not good
 	}()
 
+	// send client_hello
+	go b.sendAriaRequest(&request{
+		OP: "hello",
+	})
+
 	wg.Wait()
 }
 
@@ -274,6 +279,7 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 func (b *bot) sendAriaRequest(r *request) {
 	select {
 	case <-time.After(CHAN_TIMEOUT):
+		log.Printf("failed to send Aria request: %s\n", r.OP)
 	case b.ariaSend <- r:
 	}
 }
