@@ -38,6 +38,7 @@ func onState(b *bot, pb string, d *stateData) {
 	}
 	if d.State == "stopped" || d.Entry == nil {
 		sendErrorResponse(b, pb, "Player is not playing!")
+		return
 	}
 
 	e := newEmbed()
