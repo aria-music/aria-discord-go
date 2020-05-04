@@ -40,6 +40,7 @@ var digitEmojis = []string{
 var tweetTemplate = `%s
 %s
 #NowPlaying`
+var msgTimeout = 30 * time.Second
 
 func (b *bot) cmdFuck(m *discordgo.Message, _ []string) {
 	e := newEmbed()
@@ -259,7 +260,7 @@ func (b *bot) cmdQueue(m *discordgo.Message, _ []string) {
 		})
 	}
 
-	if _, err := b.ChannelMessageSendEmbed(m.ChannelID, e); err != nil {
+	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, false, m.ChannelID, e); err != nil {
 		log.Printf("failed to send error embed: %v\n", err)
 		return
 	}
@@ -280,7 +281,7 @@ func (b *bot) cmdTweet(m *discordgo.Message, _ []string) {
 	e.URL = url
 	e.Description = fmt.Sprintf("Click [here](%s) to tweet!", url)
 
-	if _, err := b.ChannelMessageSendEmbed(m.ChannelID, e); err != nil {
+	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, false, m.ChannelID, e); err != nil {
 		log.Printf("failed to send tweet embed: %v\n", err)
 	}
 }
@@ -332,7 +333,7 @@ func (b *bot) cmdLogin(m *discordgo.Message, _ []string) {
 	e.Title = "Welcome back!"
 	e.URL = "https://aria.gaiji.pro/auth/github/login"
 	e.Description = "Click [here](https://aria.gaiji.pro/auth/github/login) to login"
-	if _, err := b.ChannelMessageSendEmbed(m.ChannelID, e); err != nil {
+	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, false, m.ChannelID, e); err != nil {
 		log.Printf("Failed to send login embed: %v\n", err)
 	}
 }
@@ -368,7 +369,7 @@ func (b *bot) cmdVersion(m *discordgo.Message, _ []string) {
 		},
 	}
 
-	if _, err := b.ChannelMessageSendEmbed(m.ChannelID, e); err != nil {
+	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, false, m.ChannelID, e); err != nil {
 		log.Printf("failed to send version embed: %v\n", err)
 	}
 }
@@ -392,7 +393,7 @@ func sendErrorResponse(b *bot, channelID, message string) {
 	e.Title = "Error"
 	e.Description = message
 
-	if _, err := b.ChannelMessageSendEmbed(channelID, e); err != nil {
+	if _, err := b.deleteAfterChannelMessageSendEmbed(30*time.Second, false, channelID, e); err != nil {
 		log.Printf("failed to send error embed: %v\n", err)
 	}
 }

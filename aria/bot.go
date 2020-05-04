@@ -12,7 +12,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const CHAN_TIMEOUT = 30 * time.Second
+const chanTimeout = 30 * time.Second
 
 type bot struct {
 	sync.RWMutex
@@ -238,8 +238,6 @@ func (b *bot) onReady(s *discordgo.Session, r *discordgo.Ready) {
 func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	b.RLock()
 	if m.Author.ID == b.botUser.ID {
-		// if author is bot, delete after 30s
-		b.deleteMessageAfter(m.Message, 30*time.Second, false)
 		return
 	}
 	b.RUnlock()
@@ -278,7 +276,7 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func (b *bot) sendAriaRequest(r *request) {
 	select {
-	case <-time.After(CHAN_TIMEOUT):
+	case <-time.After(chanTimeout):
 		log.Printf("failed to send Aria request: %s\n", r.OP)
 	case b.ariaSend <- r:
 	}
@@ -294,4 +292,18 @@ func (b *bot) deleteMessageAfter(m *discordgo.Message, t time.Duration, force bo
 	if err := b.ChannelMessageDelete(m.ChannelID, m.ID); err != nil {
 		log.Printf("failed to delete message: %v\n", err)
 	}
+}
+
+// send MessageEmbed to channel then delete message after d
+// Returns Message and error immidiately after message is sent
+func (b *bot) deleteAfterChannelMessageSendEmbed(
+	d time.Duration, force bool,
+	channelID string, embed *discordgo.MessageEmbed,
+) (*discordgo.Message, error) {
+	m, err := b.ChannelMessageSendEmbed(channelID, embed)
+	if err != nil {
+		return nil, err
+	}
+	go b.deleteMessageAfter(m, d, force)
+	return m, nil
 }

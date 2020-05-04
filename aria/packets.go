@@ -3,7 +3,6 @@ package aria
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -95,7 +94,7 @@ func onState(b *bot, pb string, d *stateData) {
 	e.Fields = fields
 	e.Title = d.getPrefixEmoji() + e.Title
 
-	if _, err := b.ChannelMessageSendEmbed(pb, e); err != nil {
+	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, false, pb, e); err != nil {
 		log.Printf("failed to send nowplaying embed: %v\n", err)
 	}
 }
@@ -116,12 +115,10 @@ func onInvite(b *bot, pb string, d *inviteData) {
 		},
 	}
 
-	m, err := b.ChannelMessageSendEmbed(pb, e)
-	if err != nil {
+	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, true, pb, e); err != nil {
 		log.Printf("failed to send invite embed: %v\n", err)
 		return
 	}
-	b.deleteMessageAfter(m, 30*time.Second, true)
 }
 
 func onToken(b *bot, pb string, d *tokenData) {
@@ -134,12 +131,10 @@ func onToken(b *bot, pb string, d *tokenData) {
 	e.Title = "New token"
 	e.Description = fmt.Sprintf("Your token is:\n`%s`", d.Token)
 
-	m, err := b.ChannelMessageSendEmbed(pb, e)
-	if err != nil {
+	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, true, pb, e); err != nil {
 		log.Printf("failed to send token embed: %v\n", err)
 		return
 	}
-	b.deleteMessageAfter(m, 30*time.Second, true)
 }
 
 func onStateEvent(b *bot, pb string, ed *stateEventData) {
