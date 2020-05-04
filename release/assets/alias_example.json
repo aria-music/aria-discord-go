@@ -9,6 +9,7 @@
         "login": ["web"],
         "play": ["p"],
         "playnext": ["pn"],
-        "like": ["fav"]
+        "like": ["fav"],
+        "shuffle": ["sh"]
     }
 }
