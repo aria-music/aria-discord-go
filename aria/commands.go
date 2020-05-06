@@ -15,6 +15,22 @@ import (
 // since discordgo's functions does not provide context support,
 // we cannot timeout command execution
 type cmdHandler func(*discordgo.Message, []string)
+type cmdHelp struct {
+	desc   string
+	usages []string
+}
+
+var helpText = map[string]*cmdHelp{}
+
+func getHelp(cmd string) *cmdHelp {
+	return helpText[cmd]
+}
+func setHelp(cmd, desc string, usages ...string) {
+	helpText[cmd] = &cmdHelp{
+		desc,
+		usages,
+	}
+}
 
 var botVersion string = "debug"
 
@@ -378,6 +394,50 @@ func (b *bot) cmdRestart(_ *discordgo.Message, _ []string) {
 	b.cancel()
 }
 
+func (b *bot) cmdHelp(m *discordgo.Message, args []string) {
+	if len(args) < 1 {
+		e := newEmbed()
+		e.Color = 0x03fc98
+		e.Title = "Help"
+		e.Description = fmt.Sprintf("Type `%shelp [command]` to get command help", b.prefix)
+
+		cmds := []string{}
+		for c := range b.cmdHandlers {
+			cmds = append(cmds, fmt.Sprintf("`%s`", c))
+		}
+		alines := []string{}
+		for c, as := range b.alias.Alias {
+			fa := []string{}
+			for _, a := range as {
+				fa = append(fa, fmt.Sprintf("`%s`", a))
+			}
+			alines = append(alines, fmt.Sprintf("`%s`: %s", c, strings.Join(fa, ", ")))
+		}
+
+		e.Fields = []*discordgo.MessageEmbedField{
+			{
+				Name:   "Commands",
+				Value:  strings.Join(cmds, ", "),
+				Inline: false,
+			},
+			{
+				Name:   "Alias",
+				Value:  strings.Join(alines, "\n"),
+				Inline: false,
+			},
+		}
+
+		if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, false, m.ChannelID, e); err != nil {
+			log.Printf("failed to send help: %v\n", err)
+		}
+	} else {
+		cmd := b.resolveCommand(args[0])
+		if cmd != "" {
+			sendHelp(b, m.ChannelID, cmd)
+		}
+	}
+}
+
 // utility functions
 
 func newEmbed() (e *discordgo.MessageEmbed) {
@@ -393,7 +453,76 @@ func sendErrorResponse(b *bot, channelID, message string) {
 	e.Title = "Error"
 	e.Description = message
 
-	if _, err := b.deleteAfterChannelMessageSendEmbed(30*time.Second, false, channelID, e); err != nil {
+	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, false, channelID, e); err != nil {
 		log.Printf("failed to send error embed: %v\n", err)
 	}
+}
+
+func sendHelp(b *bot, channelID string, cmd string) {
+	e := newEmbed()
+	e.Color = 0x03fc98
+	e.Title = fmt.Sprintf("`%s`", cmd)
+	e.Fields = []*discordgo.MessageEmbedField{}
+
+	h := getHelp(cmd)
+	if h == nil {
+		e.Description = "No document found."
+	} else {
+		e.Description = h.desc
+		if len(h.usages) > 0 {
+			fu := []string{}
+			for _, u := range h.usages {
+				fu = append(fu, fmt.Sprintf("`%s%s`", b.prefix, u))
+			}
+			e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
+				Name:   "Usage",
+				Value:  strings.Join(fu, "\n"),
+				Inline: false,
+			})
+		}
+	}
+
+	if al := b.alias.Alias[cmd]; len(al) > 0 {
+		fa := []string{}
+		for _, a := range al {
+			fa = append(fa, fmt.Sprintf("`%s`", a))
+		}
+
+		e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
+			Name:   "Alias",
+			Value:  strings.Join(fa, ", "),
+			Inline: false,
+		})
+	}
+
+	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, false, channelID, e); err != nil {
+		log.Printf("failed to send help embed: %v\n", err)
+	}
+}
+
+func init() {
+	// TODO: better way?
+	setHelp("fuck", "fuck you", "fuck")
+	setHelp("skip", "skip current song", "skip")
+	setHelp("pause", "pause player", "pause")
+	setHelp("resume", "resume player", "resume")
+	setHelp("shuffle", "shuffle player queue", "shuffle")
+	setHelp("clear", "clear player queue", "clear")
+	setHelp("updatedb", "update GPM user DB", "updatedb <UserID>")
+	setHelp("play", "add song(s) or playlist to player queue", "play <URI>", "play <PlaylistID>")
+	setHelp("playnext", "add song(s) or playlist to head of player queue", "playnext <URI>", "playnext <PlaylistID>")
+	setHelp("repeat", "repeat current song", "repeat [count]")
+	setHelp("like", "Like song. If no URI is given, like current song.", "like [URI]")
+	setHelp("save", "Save song to playlist. If no URI is given, save current song.", "save [PlaylistID]", "save [URI] [PlaylistID]")
+	setHelp("nowplaying", "show current song info", "nowplaying")
+	setHelp("queue", "show current player queue", "queue")
+	setHelp("tweet", "get tweet link to share current song", "tweet")
+	setHelp("summon", "summon bot to voice channel where you're in", "summon")
+	setHelp("disconnect", "disconnect bot from voice channel", "disconnect")
+	setHelp("login", "get login link of web client", "login")
+	setHelp("invite", "get invite link to sign up to web client", "invite")
+	setHelp("token", "get token bot can use", "token")
+	setHelp("version", "show client version", "version")
+	setHelp("restart", "kill current discord connection", "restart")
+	setHelp("help", "show help", "help [command]")
 }

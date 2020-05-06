@@ -103,6 +103,7 @@ func newBot(
 	b.addCmdHandler("like", b.cmdLike)
 	b.addCmdHandler("save", b.cmdSave)
 	b.addCmdHandler("restart", b.cmdRestart)
+	b.addCmdHandler("help", b.cmdHelp)
 
 	// register aria packet handlers
 	b.addPacketHandler(onState)
@@ -250,29 +251,41 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// TODO: handle multiple space correctly
 	raw := strings.Split(strings.TrimSpace(m.Content), " ")
-	cmd := strings.ToLower(strings.TrimPrefix(raw[0], b.prefix))
+	rawcmd := strings.ToLower(strings.TrimPrefix(raw[0], b.prefix))
 	args := raw[1:] // spec: min <= len <= cap <= max
 
-	hs, ok := b.cmdHandlers[cmd]
-	// try alias
-	if !ok && b.alias != nil {
-		if al := b.alias.resolve(cmd); al != "" {
-			hs, ok = b.cmdHandlers[al]
-		}
-	}
-	if !ok {
+	cmd := b.resolveCommand(rawcmd)
+	if cmd == "" {
 		log.Printf("no cmdHandler for %s", cmd)
 		sendErrorResponse(b, m.ChannelID, fmt.Sprintf("Command not found: `%s`", cmd))
 		return
 	}
 
-	log.Printf("handling command: %s", cmd)
-	for _, h := range hs {
+	log.Printf("handling command: %s %v", cmd, args)
+	for _, h := range b.cmdHandlers[cmd] {
 		go h(m.Message, args)
 	}
 }
 
 // utilities
+
+func (b *bot) resolveCommand(raw string) (cmd string) {
+	_, ok := b.cmdHandlers[raw]
+	if ok {
+		cmd = raw
+		return
+	}
+	// try alias
+	if b.alias != nil {
+		if al := b.alias.resolve(raw); al != "" {
+			if _, ok = b.cmdHandlers[al]; ok {
+				cmd = al
+			}
+		}
+	}
+
+	return
+}
 
 func (b *bot) sendAriaRequest(r *request) {
 	select {
