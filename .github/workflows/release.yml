@@ -56,5 +56,5 @@ jobs:
           webhook: ${{ secrets.DISCORD_WEBHOOK_RELEASE }}
           color: 0xff7ac6
           nodetail: true
-          job: "New version is ready!"
-          description: "Release assets are ready!\n[Download](https://github.com/aria-music/aria-discord-go/releases)"
+          job: "New version of `aria-discord-go` is ready!"
+          description: "Run update.sh or [Download](https://github.com/aria-music/aria-discord-go/releases)"
