@@ -43,6 +43,8 @@ func onState(b *bot, pb string, d *stateData) {
 	e := newEmbed()
 	e.Color = 0x5ce1ff
 	e.Title = d.Entry.Title
+	// show song duration / position as embed Description
+	e.Description = fmt.Sprintf(":arrow_forward: **%s** / **%s**", durationString(d.Entry.Position), durationString(d.Entry.Duration))
 
 	if d.Entry.Thumbnail != "" {
 		e.Thumbnail = &discordgo.MessageEmbedThumbnail{
