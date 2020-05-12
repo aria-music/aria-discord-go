@@ -140,14 +140,17 @@ func onToken(b *bot, pb string, d *tokenData) {
 func onStateEvent(b *bot, pb string, ed *stateEventData) {
 	d := (*stateData)(ed)
 	if d.State == "stopped" || d.Entry == nil {
-		if err := b.UpdateStatus(0, ""); err != nil {
-			log.Printf("failed to update bot status (stopped): %v\n", err)
-		}
+		// TODO: which is better: disable updating status for player stop event,
+		// or using lock to serialize?
+
+		// if err := b.UpdateStatus(0, ""); err != nil {
+		// 	log.Printf("failed to update bot status (stopped): %v\n", err)
+		// }
 		return
 	}
 
 	title := d.getPrefixEmoji() + d.Entry.Title
-	if err := b.UpdateListeningStatus(title); err != nil {
+	if err := b.UpdateStatus(0, title); err != nil {
 		log.Printf("failed to update bot status: %v\n", err)
 	}
 }
