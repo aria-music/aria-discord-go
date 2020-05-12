@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"nhooyr.io/websocket"
 )
@@ -31,12 +32,20 @@ func newStream(endpoint, session string, streamChan chan<- []byte) (*stream, err
 func (s *stream) run(parent context.Context) {
 	ctx, cancel := context.WithCancel(parent)
 	defer cancel()
-
+	ct := 0 * time.Second
 	for {
+		select {
+		case <-ctx.Done():
+			log.Printf("stopping stream\n")
+			return
+		case <-time.After(ct):
+		}
+
 		conn, _, err := websocket.Dial(ctx, s.endpoint, nil)
 		if err != nil {
 			log.Printf("failed to open stream websocket: %v\n", err)
-			return
+			ct = 30 * time.Second
+			continue
 		}
 
 		if err := conn.Write(ctx, websocket.MessageText, ([]byte)(s.session)); err != nil {
