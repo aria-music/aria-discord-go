@@ -256,8 +256,8 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	cmd := b.resolveCommand(rawcmd)
 	if cmd == "" {
-		log.Printf("no cmdHandler for %s", cmd)
-		sendErrorResponse(b, m.ChannelID, fmt.Sprintf("Command not found: `%s`", cmd))
+		log.Printf("no cmdHandler for %s", rawcmd)
+		sendErrorResponse(b, m.ChannelID, fmt.Sprintf("Command not found: `%s`", rawcmd))
 		return
 	}
 
