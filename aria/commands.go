@@ -434,6 +434,8 @@ func (b *bot) cmdHelp(m *discordgo.Message, args []string) {
 		cmd := b.resolveCommand(args[0])
 		if cmd != "" {
 			sendHelp(b, m.ChannelID, cmd)
+		} else {
+			sendErrorResponse(b, m.ChannelID, fmt.Sprintf("Commnad not found for `%s`", args[0]))
 		}
 	}
 }
