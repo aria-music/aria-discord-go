@@ -249,8 +249,14 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	go b.deleteMessageAfter(m.Message, 0, false)
 
-	// TODO: handle multiple space correctly
-	raw := strings.Split(strings.TrimSpace(m.Content), " ")
+	dirtyRaw := strings.Split(strings.TrimSpace(m.Content), " ")
+	raw := []string{}
+	for _, tok := range dirtyRaw {
+		if tok != "" {
+			raw = append(raw, tok)
+		}
+	}
+
 	rawcmd := strings.ToLower(strings.TrimPrefix(raw[0], b.prefix))
 	args := raw[1:] // spec: min <= len <= cap <= max
 
