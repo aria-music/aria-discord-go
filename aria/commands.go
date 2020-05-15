@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -12,8 +13,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// since discordgo's functions does not provide context support,
-// we cannot timeout command execution
+var commandsString string
+var aliasesString string
+
 type cmdHandler func(*discordgo.Message, []string)
 type cmdHelp struct {
 	desc   string
@@ -401,28 +403,22 @@ func (b *bot) cmdHelp(m *discordgo.Message, args []string) {
 		e.Title = "Help"
 		e.Description = fmt.Sprintf("Type `%shelp [command]` to get command help", b.prefix)
 
-		cmds := []string{}
-		for c := range b.cmdHandlers {
-			cmds = append(cmds, fmt.Sprintf("`%s`", c))
+		if commandsString == "" {
+			b.updateCommandsString()
 		}
-		alines := []string{}
-		for c, as := range b.alias.Alias {
-			fa := []string{}
-			for _, a := range as {
-				fa = append(fa, fmt.Sprintf("`%s`", a))
-			}
-			alines = append(alines, fmt.Sprintf("`%s`: %s", c, strings.Join(fa, ", ")))
+		if aliasesString == "" {
+			b.updateAliasesString()
 		}
 
 		e.Fields = []*discordgo.MessageEmbedField{
 			{
 				Name:   "Commands",
-				Value:  strings.Join(cmds, ", "),
+				Value:  commandsString,
 				Inline: false,
 			},
 			{
 				Name:   "Alias",
-				Value:  strings.Join(alines, "\n"),
+				Value:  aliasesString,
 				Inline: false,
 			},
 		}
@@ -441,6 +437,43 @@ func (b *bot) cmdHelp(m *discordgo.Message, args []string) {
 }
 
 // utility functions
+
+func (b *bot) updateCommandsString() {
+	log.Println("updating commandString")
+
+	cmds := []string{}
+	for c := range b.cmdHandlers {
+		cmds = append(cmds, fmt.Sprintf("`%s`", c))
+	}
+
+	sort.Slice(cmds, func(i, j int) bool {
+		return cmds[i] < cmds[j]
+	})
+
+	commandsString = strings.Join(cmds, ", ")
+}
+
+func (b *bot) updateAliasesString() {
+	log.Println("updating aliasesString")
+
+	alines := []string{}
+	for c, as := range b.alias.Alias {
+		fa := []string{}
+		for _, a := range as {
+			fa = append(fa, fmt.Sprintf("`%s`", a))
+		}
+
+		sort.Slice(fa, func(i, j int) bool {
+			return fa[i] < fa[j]
+		})
+		alines = append(alines, fmt.Sprintf("`%s`: %s", c, strings.Join(fa, ", ")))
+	}
+
+	sort.Slice(alines, func(i, j int) bool {
+		return alines[i] < alines[j]
+	})
+	aliasesString = strings.Join(alines, "\n")
+}
 
 func newEmbed() (e *discordgo.MessageEmbed) {
 	e = new(discordgo.MessageEmbed)

@@ -14,8 +14,8 @@ import (
 	"nhooyr.io/websocket/wsjson"
 )
 
-const READ_LIMIT = 4194304
-const TIMEOUT = 30 * time.Second
+const wsReadLimit = 4194304
+const clientTimeout = 30 * time.Second
 
 type client struct {
 	sync.RWMutex
@@ -78,7 +78,7 @@ func (c *client) run(parent context.Context) {
 		return
 	}
 	defer conn.Close(websocket.StatusNormalClosure, "")
-	conn.SetReadLimit(READ_LIMIT)
+	conn.SetReadLimit(wsReadLimit)
 	c.conn = conn
 
 	if err := c.handleHelloPacket(ctx); err != nil {
@@ -135,7 +135,7 @@ func (c *client) recvLoop(ctx context.Context) {
 // utils
 
 func (c *client) sendRequest(parent context.Context, r *request) {
-	ctx, cancel := context.WithTimeout(parent, TIMEOUT)
+	ctx, cancel := context.WithTimeout(parent, clientTimeout)
 	defer cancel()
 
 	if err := wsjson.Write(ctx, c.conn, r); err != nil {
@@ -153,7 +153,7 @@ func (c *client) recvPacket(ctx context.Context) *packet {
 }
 
 func (c *client) handlePacket(parent context.Context, p *packet) {
-	ctx, cancel := context.WithTimeout(parent, TIMEOUT)
+	ctx, cancel := context.WithTimeout(parent, clientTimeout)
 	defer cancel()
 
 	// fill packet data
