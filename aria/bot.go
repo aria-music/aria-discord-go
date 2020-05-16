@@ -14,6 +14,8 @@ import (
 
 const chanTimeout = 30 * time.Second
 
+var errNotInVoice = errors.New("user not in voice")
+
 type bot struct {
 	sync.RWMutex
 	*discordgo.Session
@@ -21,6 +23,7 @@ type bot struct {
 	token    string
 	prefix   string
 	keepMsg  keepMsgMap
+	voice    voiceState
 	ariaRecv <-chan *packet
 	ariaSend chan<- *request
 
@@ -38,6 +41,7 @@ type bot struct {
 
 func newBot(
 	config *config,
+	voice voiceState,
 	cliToBot <-chan *packet,
 	botToCli chan<- *request,
 	stream <-chan []byte,
@@ -58,6 +62,7 @@ func newBot(
 	}
 	b.keepMsg = config.keepMsg
 
+	b.voice = voice
 	b.stream = stream
 	b.ariaRecv = cliToBot
 	b.ariaSend = botToCli
@@ -227,15 +232,15 @@ func (b *bot) onDisconnect(_ *discordgo.Session, _ *discordgo.Disconnect) {
 	b.cancel()
 }
 
-// TODO: when ready, join all AutoJoin channels
 func (b *bot) onReady(s *discordgo.Session, r *discordgo.Ready) {
 	b.Lock()
+	b.botUser = r.User
 	defer b.Unlock()
 
-	b.botUser = r.User
+	b.recoverVoiceConnections()
 }
 
-// parse message from discord, fire cmdHandlers
+// onMessage parses message from discord and fire cmdHandlers
 func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	b.RLock()
 	if m.Author.ID == b.botUser.ID {
@@ -274,6 +279,41 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 // utilities
+
+func (b *bot) recoverVoiceConnections() {
+	v := b.voice.cloneJoined()
+	for c, g := range v {
+		if err := b.joinVoice(g, c); err != nil {
+			log.Printf("failedc to recover voice: %v\n", err)
+		}
+	}
+}
+
+func (b *bot) joinVoice(guildID, channelID string) error {
+	_, err := b.ChannelVoiceJoin(guildID, channelID, false, false)
+	if err != nil {
+		return err
+	}
+	b.voice.recordJoin(guildID, channelID)
+	return nil
+}
+
+func (b *bot) disconnectVoice(guildID string) error {
+	b.Session.RLock()
+	v, ok := b.Session.VoiceConnections[guildID]
+	b.Session.RUnlock()
+
+	if !ok {
+		return errNotInVoice
+	}
+
+	if err := v.Disconnect(); err != nil {
+		return err
+	}
+
+	b.voice.recordDisconnect(v.ChannelID)
+	return nil
+}
 
 func (b *bot) resolveCommand(raw string) (cmd string) {
 	_, ok := b.cmdHandlers[raw]

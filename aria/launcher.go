@@ -30,6 +30,7 @@ func setupLogger() {
 
 type launcher struct {
 	config *config
+	voice  voiceState
 
 	cliToBot chan *packet
 	botToCli chan *request
@@ -39,6 +40,7 @@ type launcher struct {
 func newLauncher(config *config) *launcher {
 	return &launcher{
 		config:   config,
+		voice:    newVoiceState(),
 		cliToBot: make(chan *packet),
 		botToCli: make(chan *request),
 		stream:   make(chan []byte),
@@ -91,7 +93,7 @@ func (l *launcher) launchBot(ctx context.Context, errChan chan<- error) {
 			}
 		}
 
-		b, err := newBot(l.config, l.cliToBot, l.botToCli, l.stream)
+		b, err := newBot(l.config, l.voice, l.cliToBot, l.botToCli, l.stream)
 		if err != nil {
 			errChan <- fmt.Errorf("failed to initialize bot: %w", err)
 			return

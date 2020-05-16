@@ -324,24 +324,19 @@ func (b *bot) cmdSummon(m *discordgo.Message, _ []string) {
 		return
 	}
 
-	_, err = b.ChannelVoiceJoin(g.ID, vid, false, false)
-	if err != nil {
-		log.Printf("failed to join voice: %v\n", err)
+	if err = b.joinVoice(m.GuildID, vid); err != nil {
+		log.Printf("failed to summon voice: %v\n", err)
 	}
 }
 
 func (b *bot) cmdDisconnect(m *discordgo.Message, _ []string) {
-	b.Session.RLock()
-	v, ok := b.VoiceConnections[m.GuildID]
-	b.Session.RUnlock()
-
-	if !ok {
-		sendErrorResponse(b, m.ChannelID, "Not in voice channel.")
-		return
-	}
-
-	if err := v.Disconnect(); err != nil {
-		log.Printf("failed to disconnect voice: %v\n", err)
+	if err := b.disconnectVoice(m.GuildID); err != nil {
+		switch err {
+		case errNotInVoice:
+			sendErrorResponse(b, m.ChannelID, "Not in voice channel.")
+		default:
+			log.Printf("failed to disconnect voice: %v\n", err)
+		}
 	}
 }
 
