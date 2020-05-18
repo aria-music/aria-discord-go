@@ -6,11 +6,11 @@ import (
 
 type voice struct {
 	sync.RWMutex
-	joined map[string]string // channelID -> guildID
+	joined map[string]string // guildID: channelID
 }
 
 type voiceState interface {
-	// cloneJoined returns map contains channelID -> guildID
+	// cloneJoined returns map contains guildID: channelID
 	cloneJoined() map[string]string
 	recordJoin(guildID, channelID string)
 	recordDisconnect(channelID string)
@@ -38,12 +38,12 @@ func (v *voice) recordJoin(guildID, channelID string) {
 	v.Lock()
 	defer v.Unlock()
 
-	v.joined[channelID] = guildID
+	v.joined[guildID] = channelID
 }
 
-func (v *voice) recordDisconnect(channelID string) {
+func (v *voice) recordDisconnect(guildID string) {
 	v.Lock()
 	defer v.Unlock()
 
-	delete(v.joined, channelID)
+	delete(v.joined, guildID)
 }

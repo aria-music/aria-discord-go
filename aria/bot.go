@@ -282,7 +282,7 @@ func (b *bot) onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func (b *bot) recoverVoiceConnections() {
 	v := b.voice.cloneJoined()
-	for c, g := range v {
+	for g, c := range v {
 		if err := b.joinVoice(g, c); err != nil {
 			log.Printf("failedc to recover voice: %v\n", err)
 		}
@@ -311,7 +311,7 @@ func (b *bot) disconnectVoice(guildID string) error {
 		return err
 	}
 
-	b.voice.recordDisconnect(v.ChannelID)
+	b.voice.recordDisconnect(guildID)
 	return nil
 }
 
