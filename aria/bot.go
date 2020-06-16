@@ -153,7 +153,7 @@ func (b *bot) run(parent context.Context) {
 	wg := sync.WaitGroup{}
 
 	if err := b.Open(); err != nil {
-		log.Printf("failed to open Discord connection")
+		log.Printf("failed to open Discord connection: %v\n", err)
 		return
 	}
 	defer b.Close()
@@ -284,7 +284,7 @@ func (b *bot) recoverVoiceConnections() {
 	v := b.voice.cloneJoined()
 	for g, c := range v {
 		if err := b.joinVoice(g, c); err != nil {
-			log.Printf("failedc to recover voice: %v\n", err)
+			log.Printf("failed to recover voice: %v\n", err)
 		}
 	}
 }
