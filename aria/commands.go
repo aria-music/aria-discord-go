@@ -28,6 +28,9 @@ func getHelp(cmd string) *cmdHelp {
 	return helpText[cmd]
 }
 func setHelp(cmd, desc string, usages ...string) {
+	if len(usages) == 0 {
+		usages = []string{cmd}
+	}
 	helpText[cmd] = &cmdHelp{
 		desc,
 		usages,
@@ -403,6 +406,9 @@ func (b *bot) cmdHelp(m *discordgo.Message, args []string) {
 		}
 		if aliasesString == "" {
 			b.updateAliasesString()
+			if aliasesString == "" {
+				aliasesString = "No alias configuration."
+			}
 		}
 
 		e.Fields = []*discordgo.MessageEmbedField{
@@ -449,6 +455,11 @@ func (b *bot) updateCommandsString() {
 }
 
 func (b *bot) updateAliasesString() {
+	if b.alias == nil {
+		log.Println("No alias file. Ignore.")
+		return
+	}
+
 	log.Println("updating aliasesString")
 
 	alines := []string{}
@@ -512,17 +523,19 @@ func sendHelp(b *bot, channelID string, cmd string) {
 		}
 	}
 
-	if al := b.alias.Alias[cmd]; len(al) > 0 {
-		fa := []string{}
-		for _, a := range al {
-			fa = append(fa, fmt.Sprintf("`%s`", a))
-		}
+	if b.alias != nil {
+		if al := b.alias.Alias[cmd]; len(al) > 0 {
+			fa := []string{}
+			for _, a := range al {
+				fa = append(fa, fmt.Sprintf("`%s`", a))
+			}
 
-		e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
-			Name:   "Alias",
-			Value:  strings.Join(fa, ", "),
-			Inline: false,
-		})
+			e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
+				Name:   "Alias",
+				Value:  strings.Join(fa, ", "),
+				Inline: false,
+			})
+		}
 	}
 
 	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, false, channelID, e); err != nil {
@@ -532,27 +545,27 @@ func sendHelp(b *bot, channelID string, cmd string) {
 
 func init() {
 	// TODO: better way?
-	setHelp("fuck", "fuck you", "fuck")
-	setHelp("skip", "skip current song", "skip")
-	setHelp("pause", "pause player", "pause")
-	setHelp("resume", "resume player", "resume")
-	setHelp("shuffle", "shuffle player queue", "shuffle")
-	setHelp("clear", "clear player queue", "clear")
+	setHelp("fuck", "fuck you")
+	setHelp("skip", "skip current song")
+	setHelp("pause", "pause player")
+	setHelp("resume", "resume player")
+	setHelp("shuffle", "shuffle player queue")
+	setHelp("clear", "clear player queue")
 	setHelp("updatedb", "update GPM user DB", "updatedb <UserID>")
 	setHelp("play", "add song(s) or playlist to player queue", "play <URI>", "play <PlaylistID>")
 	setHelp("playnext", "add song(s) or playlist to head of player queue", "playnext <URI>", "playnext <PlaylistID>")
 	setHelp("repeat", "repeat current song", "repeat [count]")
 	setHelp("like", "Like song. If no URI is given, like current song.", "like [URI]")
-	setHelp("save", "Save song to playlist. If no URI is given, save current song.", "save [PlaylistID]", "save [URI] [PlaylistID]")
-	setHelp("nowplaying", "show current song info", "nowplaying")
-	setHelp("queue", "show current player queue", "queue")
-	setHelp("tweet", "get tweet link to share current song", "tweet")
-	setHelp("summon", "summon bot to voice channel where you're in", "summon")
-	setHelp("disconnect", "disconnect bot from voice channel", "disconnect")
-	setHelp("login", "get login link of web client", "login")
-	setHelp("invite", "get invite link to sign up to web client", "invite")
-	setHelp("token", "get token bot can use", "token")
-	setHelp("version", "show client version", "version")
-	setHelp("restart", "kill current discord connection", "restart")
+	setHelp("save", "Save song to playlist. If no URI is given, save current song.", "save [URI] <PlaylistID>")
+	setHelp("nowplaying", "show current song info")
+	setHelp("queue", "show current player queue")
+	setHelp("tweet", "get tweet link to share current song")
+	setHelp("summon", "summon bot to voice channel where you're in")
+	setHelp("disconnect", "disconnect bot from voice channel")
+	setHelp("login", "get login link of web client")
+	setHelp("invite", "get invite link to sign up to web client")
+	setHelp("token", "get token bot can use")
+	setHelp("version", "show client version")
+	setHelp("restart", "kill current discord connection")
 	setHelp("help", "show help", "help [command]")
 }
