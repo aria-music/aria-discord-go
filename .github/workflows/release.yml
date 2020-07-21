@@ -57,4 +57,4 @@ jobs:
           color: 0xff7ac6
           nodetail: true
           job: "New version of `aria-discord-go` is ready!"
-          description: "Run update.sh or [Download](https://github.com/aria-music/aria-discord-go/releases)"
+          description: "Version `${{ github.event.release.tag_name }}`\nRun update.sh or [Download](https://github.com/aria-music/aria-discord-go/releases)"
