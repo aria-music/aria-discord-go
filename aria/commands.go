@@ -308,7 +308,7 @@ func (b *bot) cmdTweet(m *discordgo.Message, _ []string) {
 }
 
 func (b *bot) cmdSummon(m *discordgo.Message, _ []string) {
-	g, err := b.Guild(m.GuildID)
+	g, err := b.State.Guild(m.GuildID)
 	if err != nil {
 		log.Printf("failed to get guild information")
 		return
