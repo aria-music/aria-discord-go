@@ -46,7 +46,7 @@ var msgAuthor = &discordgo.MessageEmbedFooter{
 var fuckEmotes = []string{
 	"🇫", "🇺", "🇨", "🇰", "🖕",
 }
-var fuckMessage = []string{
+var fuckMessageSlice = []string{
 	":regional_indicator_f:",
 	":regional_indicator_u:",
 	":regional_indicator_c:",
@@ -55,6 +55,8 @@ var fuckMessage = []string{
 	":regional_indicator_o:",
 	":regional_indicator_u:",
 }
+var fuckMessage = strings.Join(fuckMessageSlice, " ")
+
 var digitEmojis = []string{
 	"0️⃣", ":one:", "2️⃣", "3️⃣", "4️⃣", "5️⃣",
 }
@@ -63,11 +65,28 @@ var tweetTemplate = `%s
 #NowPlaying`
 var msgTimeout = 30 * time.Second
 
-func (b *bot) cmdFuck(m *discordgo.Message, _ []string) {
+func (b *bot) cmdFuck(m *discordgo.Message, args []string) {
 	e := newEmbed()
 	e.Color = rand.Intn(0x1000000) // 0x000000 - 0xffffff
-	e.Description = strings.Join(fuckMessage, " ")
-	// TODO: mention
+	e.Author = &discordgo.MessageEmbedAuthor{
+		Name:    m.Author.Username + " says...",
+		IconURL: m.Author.AvatarURL(""),
+	}
+
+	comment := strings.TrimSpace(strings.Join(args, " "))
+	if comment == "" {
+		// no comments with command
+		e.Description = fuckMessage
+	} else {
+		e.Description = comment
+		e.Fields = []*discordgo.MessageEmbedField{
+			{
+				Name:   "それはそれとして...",
+				Value:  fuckMessage,
+				Inline: false,
+			},
+		}
+	}
 
 	m, err := b.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
