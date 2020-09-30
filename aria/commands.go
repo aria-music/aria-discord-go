@@ -198,7 +198,7 @@ func (b *bot) cmdRepeat(m *discordgo.Message, args []string) {
 }
 
 func (b *bot) cmdLike(m *discordgo.Message, args []string) {
-	var uri string
+	var uris []string
 	// URI cannot be separated by space character
 	if len(args) < 1 {
 		state := b.store.getState()
@@ -206,12 +206,15 @@ func (b *bot) cmdLike(m *discordgo.Message, args []string) {
 			sendErrorResponse(b, m.ChannelID, "Nothing to like!")
 			return
 		}
-		uri = state.Entry.URI
+
+		uris = append(uris, state.Entry.URI)
 	} else {
-		uri = args[0]
+		uris = args
 	}
 
-	b.doSave(uri, "Likes")
+	for _, uri := range uris {
+		b.doSave(uri, "Likes")
+	}
 }
 
 func (b *bot) cmdSave(m *discordgo.Message, args []string) {
@@ -574,7 +577,7 @@ func init() {
 	setHelp("play", "add song(s) or playlist to player queue", "play <URI>", "play <PlaylistID>")
 	setHelp("playnext", "add song(s) or playlist to head of player queue", "playnext <URI>", "playnext <PlaylistID>")
 	setHelp("repeat", "repeat current song", "repeat [count]")
-	setHelp("like", "Like song. If no URI is given, like current song.", "like [URI]")
+	setHelp("like", "Like song. If no URI is given, like current song.", "like [...URIs]")
 	setHelp("save", "Save song to playlist. If no URI is given, save current song.", "save [URI] <PlaylistID>")
 	setHelp("nowplaying", "show current song info")
 	setHelp("queue", "show current player queue")
