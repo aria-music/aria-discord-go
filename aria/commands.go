@@ -386,7 +386,7 @@ func (b *bot) cmdInvite(m *discordgo.Message, _ []string) {
 func (b *bot) cmdToken(m *discordgo.Message, _ []string) {
 	b.sendAriaRequest(&request{
 		OP:       "token",
-		Postback: m.ChannelID,
+		Postback: m.Author.ID,
 	})
 }
 

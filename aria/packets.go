@@ -109,6 +109,7 @@ func onInvite(b *bot, pb string, d *inviteData) {
 	uc, err := b.UserChannelCreate(pb)
 	if err != nil {
 		log.Printf("failed to create user channel: %v", err)
+		return
 	}
 
 	e := newEmbed()
@@ -133,14 +134,22 @@ func onToken(b *bot, pb string, d *tokenData) {
 		return
 	}
 
-	e := newEmbed()
-	e.Color = 0x57ffae
-	e.Title = "New token"
-	e.Description = fmt.Sprintf("Your token is:\n`%s`", d.Token)
-
-	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, true, pb, e); err != nil {
-		log.Printf("failed to send token embed: %v\n", err)
+	uc, err := b.UserChannelCreate(pb)
+	if err != nil {
+		log.Printf("failed to create user channel: %v", err)
 		return
+	}
+
+	contents := []string{
+		"Your new token is:",
+		d.Token,
+	}
+
+	for _, content := range contents {
+		if _, err := b.deleteAfterChannelMessageSend(msgTimeout, true, uc.ID, content); err != nil {
+			log.Printf("failed to send token embed: %v\n", err)
+			return
+		}
 	}
 }
 

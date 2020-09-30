@@ -353,16 +353,34 @@ func (b *bot) deleteMessageAfter(m *discordgo.Message, t time.Duration, force bo
 	}
 }
 
+func (b *bot) deleteAfterChannelMessageSend(
+	d time.Duration,
+	ignoreKeepMsgChannel bool,
+	channelID string,
+	content string,
+) (*discordgo.Message, error) {
+	m, err := b.ChannelMessageSend(channelID, content)
+	if err != nil {
+		return nil, err
+	}
+
+	go b.deleteMessageAfter(m, d, ignoreKeepMsgChannel)
+	return m, nil
+}
+
 // send MessageEmbed to channel then delete message after d
 // Returns Message and error immidiately after message is sent
 func (b *bot) deleteAfterChannelMessageSendEmbed(
-	d time.Duration, force bool,
-	channelID string, embed *discordgo.MessageEmbed,
+	d time.Duration,
+	ignoreKeepMsgChannel bool,
+	channelID string,
+	embed *discordgo.MessageEmbed,
 ) (*discordgo.Message, error) {
 	m, err := b.ChannelMessageSendEmbed(channelID, embed)
 	if err != nil {
 		return nil, err
 	}
-	go b.deleteMessageAfter(m, d, force)
+
+	go b.deleteMessageAfter(m, d, ignoreKeepMsgChannel)
 	return m, nil
 }
