@@ -54,7 +54,7 @@ jobs:
       - uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_RELEASE }}
-          color: 0xff7ac6
+          color: 0x7FD5EA
           nodetail: true
           job: "New version of `aria-discord-go` is ready!"
           description: "Version `${{ github.event.release.tag_name }}`\nRun update.sh or [Download](https://github.com/aria-music/aria-discord-go/releases)"
