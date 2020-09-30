@@ -564,7 +564,7 @@ func sendHelp(b *bot, channelID string, cmd string) {
 
 func init() {
 	// TODO: better way?
-	setHelp("fuck", "fuck you")
+	setHelp("fuck", "fuck you", "fuck [comment]")
 	setHelp("skip", "skip current song")
 	setHelp("pause", "pause player")
 	setHelp("resume", "resume player")
