@@ -106,6 +106,11 @@ func onInvite(b *bot, pb string, d *inviteData) {
 		return
 	}
 
+	uc, err := b.UserChannelCreate(pb)
+	if err != nil {
+		log.Printf("failed to create user channel: %v", err)
+	}
+
 	e := newEmbed()
 	e.Color = 0x57ffae
 	e.Title = "Welcome!"
@@ -117,7 +122,7 @@ func onInvite(b *bot, pb string, d *inviteData) {
 		},
 	}
 
-	if _, err := b.deleteAfterChannelMessageSendEmbed(msgTimeout, true, pb, e); err != nil {
+	if _, err := b.ChannelMessageSendEmbed(uc.ID, e); err != nil {
 		log.Printf("failed to send invite embed: %v\n", err)
 		return
 	}

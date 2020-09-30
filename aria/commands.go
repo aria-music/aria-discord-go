@@ -379,7 +379,7 @@ func (b *bot) cmdLogin(m *discordgo.Message, _ []string) {
 func (b *bot) cmdInvite(m *discordgo.Message, _ []string) {
 	b.sendAriaRequest(&request{
 		OP:       "invite",
-		Postback: m.ChannelID,
+		Postback: m.Author.ID,
 	})
 }
 
