@@ -459,6 +459,35 @@ func (b *bot) cmdHelp(m *discordgo.Message, args []string) {
 	}
 }
 
+func (b *bot) cmdSearch(m *discordgo.Message, args []string) {
+	b.doSearch(m, "", args)
+}
+
+func (b *bot) cmdGpm(m *discordgo.Message, args []string) {
+	b.doSearch(m, "gpm", args)
+}
+
+func (b *bot) cmdYoutube(m *discordgo.Message, args []string) {
+	b.doSearch(m, "youtube", args)
+}
+
+func (b *bot) doSearch(m *discordgo.Message, provider string, rawQuery []string) {
+	query := strings.TrimSpace(strings.Join(rawQuery, " "))
+	if query == "" {
+		sendErrorResponse(b, m.ChannelID, "Search query required")
+		return
+	}
+
+	b.sendAriaRequest(&request{
+		OP:       "search",
+		Postback: m.ChannelID,
+		Data: &searchRequest{
+			Query:    query,
+			Provider: provider,
+		},
+	})
+}
+
 // utility functions
 
 func (b *bot) updateCommandsString() {
