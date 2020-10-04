@@ -290,7 +290,7 @@ func (b *bot) cmdQueue(m *discordgo.Message, _ []string) {
 	e.Fields = []*discordgo.MessageEmbedField{}
 	for i := 0; i < flen; i++ {
 		e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
-			Name:   "Track " + strconv.Itoa(i+1),
+			Name:   "Track " + strconv.Itoa(i+1) + " - " + q.Queue[i].Source,
 			Value:  digitEmojis[i+1] + " " + q.Queue[i].Title,
 			Inline: false,
 		})
