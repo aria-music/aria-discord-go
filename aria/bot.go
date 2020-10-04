@@ -109,6 +109,9 @@ func newBot(
 	b.addCmdHandler("save", b.cmdSave)
 	b.addCmdHandler("restart", b.cmdRestart)
 	b.addCmdHandler("help", b.cmdHelp)
+	b.addCmdHandler("search", b.cmdSearch)
+	b.addCmdHandler("youtube", b.cmdYoutube)
+	b.addCmdHandler("gpm", b.cmdGpm)
 
 	// register aria packet handlers
 	b.addPacketHandler(onState)
@@ -121,6 +124,7 @@ func newBot(
 	b.addPacketHandler(updateOnPlaylistsEvent)
 	b.addPacketHandler(onInvite)
 	b.addPacketHandler(onToken)
+	b.addPacketHandler(onSearch)
 
 	return b, nil
 }
