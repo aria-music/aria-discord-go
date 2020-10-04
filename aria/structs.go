@@ -67,9 +67,12 @@ type stateData struct {
 	}
 }
 
-type searchData struct {
-	Entries []entry
-}
+type searchData []entry
+
+// FIXME: for aria-core 2.0
+// type searchData struct {
+// 	Entries []entry
+// }
 
 type queueData struct {
 	Queue []entry
