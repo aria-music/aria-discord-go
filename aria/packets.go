@@ -308,22 +308,9 @@ func (w *searchWindow) render() (e *discordgo.MessageEmbed) {
 		if _, ok := w.selected[entry.URI]; ok {
 			header += " ✅"
 		}
+		header += " "
 
-		meta := fmt.Sprintf("from `%s`", entry.Source)
-		if entry.Entry != nil {
-			if entry.Entry.User != "" {
-				meta = fmt.Sprintf("%s `(%s)`", meta, entry.Entry.User)
-			}
-			if entry.Entry.Album != "" {
-				meta = fmt.Sprintf("%s, in `%s`", meta, entry.Entry.Album)
-			}
-		}
-
-		e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
-			Name:   fmt.Sprintf("%s %s", header, entry.Title),
-			Value:  meta,
-			Inline: false,
-		})
+		e.Fields = append(e.Fields, embedFieldFromEntry(&entry, header))
 	}
 
 	return e

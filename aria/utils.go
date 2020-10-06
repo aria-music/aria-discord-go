@@ -3,6 +3,8 @@ package aria
 import (
 	"fmt"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 func durationString(rawdur float64) (dstr string) {
@@ -17,6 +19,24 @@ func durationString(rawdur float64) (dstr string) {
 	}
 
 	return
+}
+
+func embedFieldFromEntry(entry *entry, header string) *discordgo.MessageEmbedField {
+	meta := fmt.Sprintf("from `%s`", entry.Source)
+	if entry.Entry != nil {
+		if entry.Entry.User != "" {
+			meta = fmt.Sprintf("%s `(%s)`", meta, entry.Entry.User)
+		}
+		if entry.Entry.Album != "" {
+			meta = fmt.Sprintf("%s, in `%s`", meta, entry.Entry.Album)
+		}
+	}
+
+	return &discordgo.MessageEmbedField{
+		Name:   header + entry.Title,
+		Value:  meta,
+		Inline: false,
+	}
 }
 
 func max(a, b int) int {
