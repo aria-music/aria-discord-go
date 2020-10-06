@@ -37,34 +37,6 @@ func setHelp(cmd, desc string, usages ...string) {
 	}
 }
 
-var botVersion string = "debug"
-
-var msgAuthor = &discordgo.MessageEmbedFooter{
-	Text: "Aria Discord Go",
-	// IconURL: "",
-}
-var fuckEmotes = []string{
-	"🇫", "🇺", "🇨", "🇰", "🖕",
-}
-var fuckMessageSlice = []string{
-	":regional_indicator_f:",
-	":regional_indicator_u:",
-	":regional_indicator_c:",
-	":regional_indicator_k:",
-	":regional_indicator_y:",
-	":regional_indicator_o:",
-	":regional_indicator_u:",
-}
-var fuckMessage = strings.Join(fuckMessageSlice, " ")
-
-var digitEmojis = []string{
-	"0️⃣", ":one:", "2️⃣", "3️⃣", "4️⃣", "5️⃣",
-}
-var tweetTemplate = `%s
-%s
-#NowPlaying`
-var msgTimeout = 30 * time.Second
-
 func (b *bot) cmdFuck(m *discordgo.Message, args []string) {
 	e := newEmbed()
 	e.Color = rand.Intn(0x1000000) // 0x000000 - 0xffffff
@@ -480,7 +452,7 @@ func (b *bot) doSearch(m *discordgo.Message, provider string, rawQuery []string)
 
 	b.sendAriaRequest(&request{
 		OP:       "search",
-		Postback: m.ChannelID,
+		Postback: fmt.Sprintf("%s:%s:%s", m.ChannelID, m.Author.ID, query), // "channelID:userID:searchQuery"
 		Data: &searchRequest{
 			Query:    query,
 			Provider: provider,
@@ -618,5 +590,8 @@ func init() {
 	setHelp("token", "get token bot can use")
 	setHelp("version", "show client version")
 	setHelp("restart", "kill current discord connection")
+	setHelp("search", "search songs")
+	setHelp("youtube", "search YouTube songs")
+	setHelp("gpm", "search Google Play Music songs")
 	setHelp("help", "show help", "help [command]")
 }
