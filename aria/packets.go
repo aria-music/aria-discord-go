@@ -310,11 +310,13 @@ func (w *searchWindow) render() (e *discordgo.MessageEmbed) {
 		}
 
 		meta := fmt.Sprintf("from `%s`", entry.Source)
-		if entry.Entry.User != "" {
-			meta = fmt.Sprintf("%s `(%s)`", meta, entry.Entry.User)
-		}
-		if entry.Entry.Album != "" {
-			meta = fmt.Sprintf("%s, in `%s`", meta, entry.Entry.Album)
+		if entry.Entry != nil {
+			if entry.Entry.User != "" {
+				meta = fmt.Sprintf("%s `(%s)`", meta, entry.Entry.User)
+			}
+			if entry.Entry.Album != "" {
+				meta = fmt.Sprintf("%s, in `%s`", meta, entry.Entry.Album)
+			}
 		}
 
 		e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
