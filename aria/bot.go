@@ -109,6 +109,9 @@ func newBot(
 	b.addCmdHandler("save", b.cmdSave)
 	b.addCmdHandler("restart", b.cmdRestart)
 	b.addCmdHandler("help", b.cmdHelp)
+	b.addCmdHandler("search", b.cmdSearch)
+	b.addCmdHandler("youtube", b.cmdYoutube)
+	b.addCmdHandler("gpm", b.cmdGpm)
 
 	// register aria packet handlers
 	b.addPacketHandler(onState)
@@ -121,6 +124,7 @@ func newBot(
 	b.addPacketHandler(updateOnPlaylistsEvent)
 	b.addPacketHandler(onInvite)
 	b.addPacketHandler(onToken)
+	b.addPacketHandler(onSearch)
 
 	return b, nil
 }
@@ -383,4 +387,78 @@ func (b *bot) deleteAfterChannelMessageSendEmbed(
 
 	go b.deleteMessageAfter(m, d, ignoreKeepMsgChannel)
 	return m, nil
+}
+
+func (b *bot) openReactor(msg *discordgo.Message, userID string, emojis []string, timeout time.Duration) (clickChan <-chan string, cancel func(), err error) {
+	cc := make(chan string)
+
+	// prepare emoji set
+	// this may cause bigger memory footprint.
+	// Need to benchmark and set emojis len threshold.
+	emojiSet := map[string]struct{}{}
+	for _, emoji := range emojis {
+		emojiSet[emoji] = struct{}{}
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	timer := time.NewTimer(timeout)
+	wg := sync.WaitGroup{}
+
+	// callback
+	onReactionManipulate := func(r *discordgo.MessageReaction) {
+		if r.MessageID != msg.ID || r.UserID != userID {
+			return
+		}
+		// log.Printf("got emoji %s %s", r.Emoji.ID, r.Emoji.Name)
+		if _, ok := emojiSet[r.Emoji.Name]; !ok {
+			return
+		}
+
+		// prolong timer
+		timer.Reset(timeout)
+
+		wg.Add(1)
+		select {
+		case cc <- r.Emoji.Name:
+		case <-ctx.Done():
+		}
+		wg.Done()
+	}
+	// register callback
+	removeAdd := b.AddHandler(func(_ *discordgo.Session, r *discordgo.MessageReactionAdd) {
+		onReactionManipulate(r.MessageReaction)
+	})
+	removeRem := b.AddHandler(func(_ *discordgo.Session, r *discordgo.MessageReactionRemove) {
+		onReactionManipulate(r.MessageReaction)
+	})
+
+	// called when timer is fired, or context is closed
+	doClose := func() {
+		removeAdd()
+		removeRem()
+		wg.Wait()
+		close(cc)
+	}
+
+	// launch timer thread
+	go func() {
+		select {
+		case <-ctx.Done():
+		case <-timer.C:
+			// cancel context to stop all goroutines try to send click to cc
+			cancel()
+		}
+		doClose()
+	}()
+
+	// send emojis
+	for _, emoji := range emojis {
+		if err := b.MessageReactionAdd(msg.ChannelID, msg.ID, emoji); err != nil {
+			cancel()
+			return nil, nil, fmt.Errorf("failed to open reactor: %w", err)
+		}
+	}
+
+	clickChan = cc
+	return
 }

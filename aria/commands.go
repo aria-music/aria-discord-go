@@ -37,34 +37,6 @@ func setHelp(cmd, desc string, usages ...string) {
 	}
 }
 
-var botVersion string = "debug"
-
-var msgAuthor = &discordgo.MessageEmbedFooter{
-	Text: "Aria Discord Go",
-	// IconURL: "",
-}
-var fuckEmotes = []string{
-	"🇫", "🇺", "🇨", "🇰", "🖕",
-}
-var fuckMessageSlice = []string{
-	":regional_indicator_f:",
-	":regional_indicator_u:",
-	":regional_indicator_c:",
-	":regional_indicator_k:",
-	":regional_indicator_y:",
-	":regional_indicator_o:",
-	":regional_indicator_u:",
-}
-var fuckMessage = strings.Join(fuckMessageSlice, " ")
-
-var digitEmojis = []string{
-	"0️⃣", ":one:", "2️⃣", "3️⃣", "4️⃣", "5️⃣",
-}
-var tweetTemplate = `%s
-%s
-#NowPlaying`
-var msgTimeout = 30 * time.Second
-
 func (b *bot) cmdFuck(m *discordgo.Message, args []string) {
 	e := newEmbed()
 	e.Color = rand.Intn(0x1000000) // 0x000000 - 0xffffff
@@ -290,7 +262,7 @@ func (b *bot) cmdQueue(m *discordgo.Message, _ []string) {
 	e.Fields = []*discordgo.MessageEmbedField{}
 	for i := 0; i < flen; i++ {
 		e.Fields = append(e.Fields, &discordgo.MessageEmbedField{
-			Name:   "Track " + strconv.Itoa(i+1),
+			Name:   "Track " + strconv.Itoa(i+1) + " - " + q.Queue[i].Source,
 			Value:  digitEmojis[i+1] + " " + q.Queue[i].Title,
 			Inline: false,
 		})
@@ -459,6 +431,35 @@ func (b *bot) cmdHelp(m *discordgo.Message, args []string) {
 	}
 }
 
+func (b *bot) cmdSearch(m *discordgo.Message, args []string) {
+	b.doSearch(m, "", args)
+}
+
+func (b *bot) cmdGpm(m *discordgo.Message, args []string) {
+	b.doSearch(m, "gpm", args)
+}
+
+func (b *bot) cmdYoutube(m *discordgo.Message, args []string) {
+	b.doSearch(m, "youtube", args)
+}
+
+func (b *bot) doSearch(m *discordgo.Message, provider string, rawQuery []string) {
+	query := strings.TrimSpace(strings.Join(rawQuery, " "))
+	if query == "" {
+		sendErrorResponse(b, m.ChannelID, "Search query required")
+		return
+	}
+
+	b.sendAriaRequest(&request{
+		OP:       "search",
+		Postback: fmt.Sprintf("%s:%s:%s", m.ChannelID, m.Author.ID, query), // "channelID:userID:searchQuery"
+		Data: &searchRequest{
+			Query:    query,
+			Provider: provider,
+		},
+	})
+}
+
 // utility functions
 
 func (b *bot) updateCommandsString() {
@@ -589,5 +590,8 @@ func init() {
 	setHelp("token", "get token bot can use")
 	setHelp("version", "show client version")
 	setHelp("restart", "kill current discord connection")
+	setHelp("search", "search songs")
+	setHelp("youtube", "search YouTube songs")
+	setHelp("gpm", "search Google Play Music songs")
 	setHelp("help", "show help", "help [command]")
 }

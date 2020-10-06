@@ -163,11 +163,9 @@ func (c *client) handlePacket(parent context.Context, p *packet) {
 		return
 	}
 
-	// TODO: fill nil to Data if unmarshall fails?
 	d := dp.data()
 	if err := json.Unmarshal(p.RawData, d); err != nil {
-		log.Printf("failed to parse packet data: %v\n", err)
-		return
+		log.Printf("failed to parse packet data: %v (%s)", err, p.RawData)
 	}
 	p.Data = d
 
